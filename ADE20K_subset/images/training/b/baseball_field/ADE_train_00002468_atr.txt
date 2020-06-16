@@ -1,0 +1,3 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tree # trees # ""
+003 # 0 # 0 # pitch # pitch # ""

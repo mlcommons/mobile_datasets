@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # seat # seat # ""
+003 # 0 # 1 # door # door # ""
+001 # 1 # 0 # window # window # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "sitting"
+005 # 0 # 0 # paper # paper # ""

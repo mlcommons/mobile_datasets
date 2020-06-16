@@ -1,0 +1,3 @@
+001 # 0 # 0 # earth, ground # ground # ""
+002 # 0 # 0 # white mark # white mark # ""
+003 # 0 # 0 # pipe, pipage, piping # pipe # ""

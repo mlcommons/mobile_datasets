@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # mountain, mount # mountain # ""
+001 # 1 # 0 # cloud # cloud # ""
+003 # 0 # 0 # plant, flora, plant life # plants # ""
+002 # 1 # 0 # cloud # cloud # ""

@@ -1,0 +1,8 @@
+001 # 0 # 0 # tree # trees # ""
+002 # 0 # 0 # grass # grass # ""
+003 # 0 # 0 # tree # tree # "trunk"
+004 # 0 # 0 # hen, biddy # hen # ""
+005 # 0 # 0 # hen, biddy # hen # ""
+006 # 0 # 0 # hen, biddy # hen # ""
+007 # 0 # 0 # hen, biddy # hen # ""
+008 # 0 # 0 # hen, biddy # hen # ""

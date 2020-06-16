@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # mountain, mount # mountain # "rocky"
+003 # 0 # 0 # land, ground, soil # land # ""
+004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "sitting"
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "sitting"
+006 # 0 # 0 # tree # trees # ""
+007 # 0 # 0 # shrub, bush # bushes # ""

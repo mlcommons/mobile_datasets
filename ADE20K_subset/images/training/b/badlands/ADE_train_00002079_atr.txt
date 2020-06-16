@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # badlands # badlands # ""
+003 # 0 # 0 # rock, stone # rock # ""
+001 # 1 # 0 # cloud # cloud # ""
+002 # 1 # 0 # cloud # cloud # ""
+004 # 0 # 0 # hill # hill # ""
+005 # 0 # 0 # hill # hill # ""

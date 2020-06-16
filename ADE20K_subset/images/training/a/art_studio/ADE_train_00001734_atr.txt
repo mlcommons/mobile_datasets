@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # painting, picture # picture # "painting"
+004 # 0 # 0 # painting, picture # picture # ""
+005 # 0 # 1 # easel # easel # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

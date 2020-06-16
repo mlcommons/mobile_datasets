@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # wall # wall # ""
+004 # 0 # 0 # shower # shower # ""
+005 # 0 # 1 # windowpane, window # window # ""
+006 # 0 # 0 # countertop # countertop # ""
+007 # 0 # 0 # mirror # mirror # ""
+008 # 0 # 0 # towel # towel # ""

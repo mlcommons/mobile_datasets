@@ -1,0 +1,7 @@
+001 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # window # window # "bay"
+002 # 0 # 0 # pane, pane of glass, window glass # pane # "glass"
+002 # 1 # 0 # window # window # ""
+003 # 1 # 0 # window # window # ""
+003 # 0 # 0 # pane, pane of glass, window glass # pane # "glass"
+004 # 1 # 0 # window # window # ""

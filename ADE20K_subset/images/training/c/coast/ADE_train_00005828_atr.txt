@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea water # ""
+003 # 0 # 0 # mountain, mount # mountain # ""
+001 # 1 # 0 # clouds # clouds # ""
+004 # 0 # 1 # house # house # ""

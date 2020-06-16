@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 1 # painting, picture # picture # "painting"
+003 # 0 # 0 # table # table # ""
+004 # 0 # 0 # painting, picture # picture # "painting"
+005 # 0 # 0 # painting, picture # picture # "paintings"
+006 # 0 # 1 # painting, picture # picture # "painting"
+007 # 0 # 0 # pen # pen # ""

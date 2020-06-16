@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # ceiling # ceiling # ""
+004 # 0 # 1 # basket, basketball hoop, hoop # basketball hoop # ""
+005 # 0 # 0 # court # court # ""
+006 # 0 # 0 # grandstand, covered stand # grandstand # ""
+007 # 0 # 0 # grandstand, covered stand # grandstand # ""
+008 # 0 # 0 # grandstand, covered stand # grandstand # ""

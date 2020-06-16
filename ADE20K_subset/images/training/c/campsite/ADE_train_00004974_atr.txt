@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # earth, ground # ground # ""
+003 # 0 # 0 # tent, collapsible shelter # tent # ""
+004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "man standing"
+005 # 0 # 1 # bicycle, bike, wheel, cycle # bicycle # ""

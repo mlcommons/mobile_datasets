@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # floor, flooring # floor # ""
+004 # 0 # 0 # door # door # ""
+005 # 0 # 0 # bed # bed # "double size"
+006 # 0 # 1 # chair # chair # ""
+007 # 0 # 1 # table # night table # ""
+001 # 1 # 0 # headboard # headboard # ""

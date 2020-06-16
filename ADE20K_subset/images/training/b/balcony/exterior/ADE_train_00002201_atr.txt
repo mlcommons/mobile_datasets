@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # balcony # balcony # ""
+002 # 1 # 0 # balustrade # balustrade # ""
+003 # 0 # 0 # tree # tree # ""

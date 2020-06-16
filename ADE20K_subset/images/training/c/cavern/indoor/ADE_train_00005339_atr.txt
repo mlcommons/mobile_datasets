@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # wall # wall # "rocky"
+003 # 0 # 0 # wall # wall # "rocky"
+004 # 0 # 0 # wall # wall # "rocky"
+005 # 0 # 0 # water # water # ""

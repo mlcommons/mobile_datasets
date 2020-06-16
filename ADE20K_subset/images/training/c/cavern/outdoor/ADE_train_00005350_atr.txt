@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # "rocky"
+002 # 0 # 0 # wall # wall # "rocky"
+003 # 0 # 0 # wall # wall # "rocky"
+004 # 0 # 0 # water # water # ""
+005 # 0 # 0 # rock, stone # rock # ""
+006 # 0 # 0 # rock, stone # rocks # ""
+007 # 0 # 0 # rock, stone # rocks # ""
+008 # 0 # 0 # rock, stone # rocks # ""

@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # plant, flora, plant life # plants # ""
+003 # 0 # 0 # bridge, span # bridge # ""
+004 # 0 # 0 # water # water # ""
+005 # 0 # 0 # streetlight, street lamp # street light # ""
+006 # 0 # 0 # tree # tree # ""
+007 # 0 # 0 # tree # tree # ""

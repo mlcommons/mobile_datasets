@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # water # water # ""
+003 # 0 # 0 # bridge, span # bridge # ""
+004 # 0 # 0 # earth, ground # ground # ""
+005 # 0 # 0 # truck, motortruck # truck # ""
+006 # 0 # 0 # earth, ground # ground # ""
+007 # 0 # 0 # truck, motortruck # truck # ""

@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # balcony # balcony # ""
+002 # 1 # 0 # balcony # balcony # ""
+003 # 1 # 0 # balcony # balcony # ""
+004 # 1 # 0 # railing # railing # ""
+005 # 1 # 0 # window # window # ""

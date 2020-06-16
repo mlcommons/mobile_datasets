@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # fireworks # fireworks # ""
+003 # 0 # 0 # river # river water # ""
+004 # 0 # 0 # building, edifice # buildings # ""
+005 # 0 # 0 # bridge, span # bridge # ""

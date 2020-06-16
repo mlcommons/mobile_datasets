@@ -1,0 +1,7 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # building, edifice # building # ""
+003 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "standing"
+001 # 1 # 0 # door # door # ""
+002 # 1 # 0 # window # window # ""
+004 # 0 # 0 # pane, pane of glass, window glass # pane # "glass"
+005 # 0 # 0 # pane, pane of glass, window glass # pane # "glass"

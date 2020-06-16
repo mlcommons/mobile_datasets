@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # road, route # road # ""
+003 # 0 # 0 # building, edifice # building # ""
+004 # 0 # 0 # flag # flag # ""
+005 # 0 # 0 # car, auto, automobile, machine, motorcar # car # ""
+006 # 0 # 1 # car, auto, automobile, machine, motorcar # car # ""
+007 # 0 # 0 # text, textual matter # text # ""
+008 # 0 # 0 # text, textual matter # text # ""

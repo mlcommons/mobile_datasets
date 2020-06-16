@@ -1,0 +1,5 @@
+001 # 0 # 0 # sidewalk, pavement # sidewalk # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # floor, flooring # floor # "paving stone"
+004 # 0 # 0 # tree # trees # ""
+005 # 0 # 0 # arch, archway # arch # ""

@@ -1,0 +1,5 @@
+001 # 0 # 0 # windowpane, window # window # ""
+002 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+003 # 0 # 0 # ceiling controls # ceiling controls # ""
+004 # 0 # 0 # controls # controls # ""
+005 # 0 # 0 # windowpane, window # window # ""

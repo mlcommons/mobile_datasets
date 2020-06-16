@@ -1,0 +1,7 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # window # window # ""
+002 # 1 # 0 # double door # double door # ""
+003 # 1 # 0 # double door # double door # ""
+004 # 1 # 0 # double door # double door # ""
+005 # 1 # 0 # window # window # ""

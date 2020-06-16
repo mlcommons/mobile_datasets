@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tower # tower # ""
+003 # 0 # 0 # post # post # ""
+004 # 0 # 0 # building, edifice # building # ""
+005 # 0 # 0 # building, edifice # buildings # ""
+006 # 0 # 0 # tree # trees # ""
+007 # 0 # 0 # building, edifice # buildings # ""
+008 # 0 # 0 # tree # tree # ""

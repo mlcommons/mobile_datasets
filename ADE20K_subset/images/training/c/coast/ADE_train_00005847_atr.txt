@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea water # ""
+003 # 0 # 0 # mountain, mount # mountain # ""
+004 # 0 # 0 # boat # boat # ""
+005 # 0 # 0 # flag # flag # ""
+006 # 0 # 0 # rock, stone # rocks # ""

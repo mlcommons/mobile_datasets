@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # road, route # road # ""
+003 # 0 # 0 # building, edifice # building # ""
+004 # 0 # 0 # light, light source # ceiling recessed light # "on"
+001 # 1 # 0 # column # column # ""
+002 # 1 # 0 # column # column # ""
+003 # 1 # 0 # entrance # entrance # ""

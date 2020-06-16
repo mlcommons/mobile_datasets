@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tree # trees # ""
+003 # 0 # 0 # building, edifice # building # ""
+004 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # window # window # ""
+002 # 1 # 0 # window # window # ""
+005 # 0 # 0 # decoration, ornament, ornamentation # decoration # ""
+006 # 0 # 0 # signboard, sign # sign # ""

@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea water # ""
+001 # 1 # 0 # wave # wave # ""
+002 # 1 # 0 # wave # wave # ""
+003 # 1 # 0 # wave # wave # ""
+003 # 0 # 0 # sand # sand beach # ""

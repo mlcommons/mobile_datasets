@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # ceiling # ceiling # ""
+003 # 0 # 1 # car, auto, automobile, machine, motorcar # car # ""
+004 # 0 # 1 # car, auto, automobile, machine, motorcar # car # ""
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

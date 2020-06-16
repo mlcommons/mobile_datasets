@@ -1,0 +1,5 @@
+001 # 0 # 0 # windowpane, window # window # ""
+002 # 0 # 0 # instrument control # instrument control # ""
+003 # 0 # 0 # screen, crt screen # screen # ""
+004 # 0 # 0 # screen, crt screen # screen # ""
+005 # 0 # 0 # keyboard # keyboard # ""

@@ -1,0 +1,4 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # roller coaster # roller coaster # ""
+003 # 0 # 0 # roller coaster cars # roller coaster cars # ""
+004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # people # ""

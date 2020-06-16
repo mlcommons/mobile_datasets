@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea water # ""
+003 # 0 # 0 # tree # trees # ""
+004 # 0 # 1 # boat # boat # ""
+005 # 0 # 0 # seat # seats # ""
+006 # 0 # 0 # table # table # ""

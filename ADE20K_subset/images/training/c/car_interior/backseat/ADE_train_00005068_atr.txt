@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # windowpane, window # window # ""
+003 # 0 # 1 # door # door # ""
+004 # 0 # 0 # seat # seats # ""
+005 # 0 # 1 # seat # seat # ""
+001 # 1 # 1 # window # window # ""

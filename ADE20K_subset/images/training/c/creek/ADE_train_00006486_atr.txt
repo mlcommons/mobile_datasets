@@ -1,0 +1,8 @@
+001 # 0 # 0 # rock, stone # rocks # ""
+002 # 0 # 0 # rafting # rafting # ""
+003 # 0 # 0 # rock, stone # rock # ""
+004 # 0 # 0 # rock, stone # rock # ""
+005 # 0 # 0 # rock, stone # rock # ""
+006 # 0 # 0 # rock, stone # rock # ""
+007 # 0 # 0 # rock, stone # rock # ""
+008 # 0 # 0 # rock, stone # rock # ""

@@ -1,0 +1,6 @@
+001 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "pilot"
+002 # 0 # 0 # seat # seat # ""
+003 # 0 # 0 # suit # suit # ""
+004 # 0 # 0 # controls # controls # ""
+005 # 0 # 0 # notebook # notebook # ""
+006 # 0 # 0 # notebook # notebook # ""

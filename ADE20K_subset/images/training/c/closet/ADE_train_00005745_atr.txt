@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wardrobe, closet, press # wardrobe # ""
+003 # 0 # 0 # apparel, wearing apparel, dress, clothes # clothes # ""
+004 # 0 # 0 # apparel, wearing apparel, dress, clothes # clothes # ""
+005 # 0 # 0 # ties # ties # ""
+006 # 0 # 0 # hanger # hanger # ""

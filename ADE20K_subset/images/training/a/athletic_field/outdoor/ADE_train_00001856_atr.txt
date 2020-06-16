@@ -1,0 +1,4 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tree # trees # ""
+003 # 0 # 0 # field # field # ""
+004 # 0 # 0 # fence, fencing # fence # ""

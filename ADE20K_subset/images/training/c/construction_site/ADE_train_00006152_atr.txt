@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # scaffolding, staging # scaffolding # ""
+003 # 0 # 0 # building, edifice # building # ""
+004 # 0 # 0 # roadroller # roadroller # ""
+005 # 0 # 0 # steam shovel # steam shovel # ""
+006 # 0 # 0 # earth, ground # ground # ""
+007 # 0 # 1 # steam shovel # steam shovel # ""

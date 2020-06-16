@@ -1,0 +1,7 @@
+001 # 0 # 0 # sea # sea water # ""
+002 # 0 # 1 # boat # boat # ""
+003 # 0 # 0 # deck # deck # ""
+004 # 0 # 0 # pole # pole # ""
+005 # 0 # 0 # bell # bell # ""
+006 # 0 # 0 # pool # pool # ""
+007 # 0 # 0 # bench # bench # ""

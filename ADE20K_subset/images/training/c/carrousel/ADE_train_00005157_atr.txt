@@ -1,0 +1,6 @@
+001 # 0 # 0 # carousel # carousel # ""
+002 # 0 # 0 # hobby-horse # hobby-horse # ""
+003 # 0 # 0 # hobby-horse # hobby-horse # ""
+004 # 0 # 0 # hobby-horse # hobby-horse # ""
+005 # 0 # 0 # hobby-horse # hobby-horse # ""
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

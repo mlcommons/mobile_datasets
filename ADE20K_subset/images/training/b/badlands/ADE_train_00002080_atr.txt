@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # earth, ground # ground # ""
+003 # 0 # 0 # badlands # badlands # ""
+004 # 0 # 0 # hill # hills # ""
+005 # 0 # 0 # mound # mound # ""
+006 # 0 # 0 # mound # mound # ""
+007 # 0 # 0 # cliff, drop, drop-off # cliff # ""
+008 # 0 # 0 # cliff, drop, drop-off # cliff # ""

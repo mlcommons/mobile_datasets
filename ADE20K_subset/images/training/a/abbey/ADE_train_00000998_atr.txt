@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # "night"
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # window # window # ""
+002 # 1 # 0 # window # window # ""
+003 # 1 # 0 # window # window # ""
+003 # 0 # 0 # streetlight, street lamp # street light # ""
+004 # 1 # 0 # window # window # ""

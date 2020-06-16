@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # floor, flooring # floor # "tile"
+004 # 0 # 0 # ceiling # ceiling # ""
+005 # 0 # 0 # windowpane, window # window # "awning"
+006 # 0 # 1 # door # door # ""
+007 # 0 # 0 # chair # chair # ""
+008 # 0 # 0 # cushion # cushion # ""

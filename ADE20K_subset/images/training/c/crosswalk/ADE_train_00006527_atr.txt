@@ -1,0 +1,6 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # sidewalk, pavement # sidewalk # ""
+001 # 1 # 0 # crosswalk # crosswalk # ""
+003 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+004 # 0 # 0 # pole # pole # ""
+005 # 0 # 0 # umbrella # umbrella # ""

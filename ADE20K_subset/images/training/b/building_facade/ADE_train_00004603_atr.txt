@@ -1,0 +1,8 @@
+001 # 0 # 0 # building, edifice # building # ""
+002 # 0 # 0 # awning, sunshade, sunblind # awning # ""
+003 # 0 # 0 # awning, sunshade, sunblind # awning # ""
+001 # 1 # 1 # window # window # ""
+002 # 1 # 1 # window # window # ""
+003 # 1 # 0 # window # window # ""
+004 # 1 # 0 # window # window # ""
+005 # 1 # 0 # column # column # ""

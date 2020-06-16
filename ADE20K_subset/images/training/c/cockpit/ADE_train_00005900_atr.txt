@@ -1,0 +1,7 @@
+001 # 0 # 0 # flight deck # flight deck # ""
+002 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "pilot"
+003 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "pilot"
+004 # 0 # 1 # seat # seat # ""
+005 # 0 # 0 # windowpane, window # window # ""
+006 # 0 # 0 # controls # controls # ""
+007 # 0 # 0 # controls # controls # ""

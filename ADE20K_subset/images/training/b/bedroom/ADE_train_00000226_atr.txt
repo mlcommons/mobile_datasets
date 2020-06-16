@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # ceiling # ceiling # ""
+004 # 0 # 1 # windowpane, window # window # "sliding"
+005 # 0 # 0 # bed # bed # "bunk"
+001 # 1 # 0 # ladder # ladder # ""

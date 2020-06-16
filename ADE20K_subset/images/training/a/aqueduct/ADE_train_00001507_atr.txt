@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # aqueduct # aqueduct # ""
+003 # 0 # 0 # earth, ground # ground # ""
+004 # 0 # 0 # bird # bird # ""
+005 # 0 # 0 # bird # bird # ""
+006 # 0 # 0 # can, tin, tin can # can # ""
