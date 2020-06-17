@@ -10,3 +10,4 @@ Script which converts a given dataset to imagenet/coco-like dataset for speed te
  - Images folder / annotations folder : they may not be in the same "out_path" folder
  - Extract an imagenet like dataset from ADE20K dataset: should keep only images which contain classes which belong to imagenet classes.
  - Extract bounding boxes from mask images of ADE20K dataset
+ - Build some tests?
