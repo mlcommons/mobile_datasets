@@ -9,8 +9,7 @@ out_ADE20K_subset contains the output created by this script when run with the f
 python script_organized.py --in_path=ADE20K_subset --out_path=out_ADE20K_subset --N=10 --dataset=ADE20K --type=imagenet
 python script_organized.py --in_path=kanter_dataset --out_path=out_kanter --N=8 --dataset=kanter --type=imagenet
 
-Maybe it would be better organized with one class for each different input dataset we give.
-Then if the user wants to use an input dataset which is formatted a certain way, they will need to implement the corresponding methods
+If the user wants to use an input dataset which is not ADE20K or kanter, they will need to implement the corresponding methods
 """
 
 parser = argparse.ArgumentParser()
@@ -80,11 +79,11 @@ class InputDataset:
                ):
         """Copies and formats images + annotations from in_path to out_path to mimick the format of type dataset.
         The tasks performed so far are:
-         - renames images
+         - rename images
          - create annotations file
 
         Args:
-            type: "coco" or "imagenet"
+            selected_img_path: list of paths to images that we want to put in the output dataset
         """
         if self.type == "coco":
             out_ann_name = os.path.join(self.out_ann_path, "coco_val.pbtxt")
@@ -109,6 +108,10 @@ class InputDataset:
         raise NotImplementedError
 
     def subsample(self,):
+        """Policy for subsampling.
+        Returns:
+            selected_img_path: list of paths to images that we want to put in the output dataset
+        """
         raise NotImplementedError
 
 
@@ -120,8 +123,9 @@ class ADE20KDataset(InputDataset):
         self.in_annotations = {}
 
     def subsample(self, N, policy="random"):
-        """Subsamples from ADE20K
-        policy "all" : subsamples all images which class is in imagenet
+        """Subsamples from ADE20K: it considers all images which class intersect with imagenet classes.
+        Args:
+            N: number of wanted samples.
         """
         selected_img_path = []
         for set_path in [self.train_path, self.val_path]:
@@ -193,8 +197,6 @@ def main():
         dataset = ADE20KDataset(path=in_path, out_path=args.out_path, type=args.type)
     else:
         raise ValueError
-
-    #out_img_path, out_ann_path = dir_structure(out_path=args.out_path, type=args.type)
 
     selected_img_path = dataset.subsample(N=args.N)
     dataset.format(selected_img_path=selected_img_path)
