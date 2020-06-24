@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # building, edifice # building # ""
-003 # 0 # 0 # building, edifice # buildings # ""
-004 # 0 # 0 # tree # trees # ""
-001 # 1 # 0 # balcony # balcony # ""
-002 # 1 # 0 # balcony # balcony # ""
-003 # 1 # 0 # balcony # balcony # ""
-004 # 1 # 0 # balcony # balcony # ""

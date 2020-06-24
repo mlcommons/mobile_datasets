@@ -1,7 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # painting, picture # picture # "photo"
-004 # 0 # 0 # table # table # ""
-005 # 0 # 0 # windowpane, window # window # ""
-006 # 0 # 1 # bed # bed # ""
-007 # 0 # 0 # lamp # table lamp # "off"

@@ -1,6 +1,0 @@
-001 # 0 # 0 # mountain, mount # mountain # ""
-002 # 0 # 0 # ice mountain # ice mountain # ""
-003 # 0 # 0 # crevasse # crevasse # ""
-004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
-005 # 0 # 0 # glove # glove # ""
-006 # 0 # 0 # glove # glove # ""

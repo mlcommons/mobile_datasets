@@ -1,8 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # ceiling # ceiling # ""
-004 # 0 # 0 # court # court # ""
-005 # 0 # 0 # basket, basketball hoop, hoop # basketball hoop # ""
-006 # 0 # 0 # fluorescent, fluorescent fixture # fluorescent tube # "on"
-007 # 0 # 0 # fluorescent, fluorescent fixture # fluorescent tube # "on"
-008 # 0 # 0 # bench # bench # ""

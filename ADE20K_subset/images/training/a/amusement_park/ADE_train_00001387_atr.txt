@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # boardwalk # boardwalk # ""
-003 # 0 # 0 # building, edifice # building # ""
-004 # 0 # 0 # merry-go-round # merry-go-round # ""
-005 # 0 # 0 # building, edifice # buildings # ""
-006 # 0 # 0 # booth # booth # ""
-007 # 0 # 0 # booth # booth # ""
-008 # 0 # 0 # stairs, steps # stairs # ""

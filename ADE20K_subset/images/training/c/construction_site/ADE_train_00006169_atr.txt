@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # crane # crane # ""
-003 # 0 # 0 # tree # trees # ""
-004 # 0 # 0 # tree # tree # ""
-005 # 0 # 0 # wheel # wheel # ""
-006 # 0 # 0 # motor # motor # ""
-007 # 0 # 0 # tank, storage tank # tank # ""
-008 # 0 # 0 # plant, flora, plant life # plants # ""

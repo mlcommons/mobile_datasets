@@ -1,6 +1,0 @@
-001 # 0 # 0 # sidewalk, pavement # sidewalk # ""
-002 # 0 # 0 # building, edifice # building # ""
-001 # 1 # 0 # shop window # shop window # ""
-002 # 1 # 0 # shop window # shop window # ""
-003 # 1 # 1 # window # window # ""
-004 # 1 # 1 # window # window # ""

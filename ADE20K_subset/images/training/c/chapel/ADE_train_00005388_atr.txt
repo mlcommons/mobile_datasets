@@ -1,6 +1,0 @@
-001 # 0 # 0 # floor, flooring # floor # ""
-002 # 0 # 0 # altarpiece, reredos # altarpiece # ""
-003 # 0 # 0 # altar, communion table, lord's table # altar # ""
-004 # 0 # 0 # cross # cross # ""
-005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
-006 # 0 # 1 # chandelier, pendant, pendent # chandelier # ""

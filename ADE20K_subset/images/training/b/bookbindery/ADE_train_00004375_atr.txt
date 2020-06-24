@@ -1,6 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # floor, flooring # floor # ""
-003 # 0 # 0 # shelf # shelves # ""
-004 # 0 # 1 # box # box # ""
-005 # 0 # 0 # machine # machine # ""
-006 # 0 # 1 # lamp # table lamp # "on"

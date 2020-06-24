@@ -1,6 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # building, edifice # building # ""
-004 # 0 # 0 # hedge, hedgerow # hedge # ""
-001 # 1 # 0 # balcony # balcony # ""
-002 # 1 # 0 # window # window # ""

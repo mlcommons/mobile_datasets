@@ -1,13 +1,28 @@
 Script which converts a given dataset to imagenet/coco-like dataset for speed tests.
 
-# Questions/Remarks:
- - The input dataset should contain classes which also belong to imagenet classes
- - Formatting depends a lot on the structure of the input dataset. For example, the code might need to change if we give as input dataset the ADE20K dataset vs an artificial dataset. How to handle this? If we create an artificial dataset, should we define some conventions on the way annotations (labels or bounding boxes) are stored ?
- - Should we mimick imagenet/coco, or the way imagenet/coco are read from mlperf mobile app? (If in mobile app, we have already done some processing of imagenet, mimicking imagenet may not be what we want)
- - Should we subsample first and then only process the subsamples, or process the whole input dataset and then subsample? (The latter may require more computations and memory)
 
-# TODO / TO CHANGE
- - Images folder / annotations folder : they may not be in the same "out_path" folder
- - Extract an imagenet like dataset from ADE20K dataset: should keep only images which contain classes which belong to imagenet classes.
- - Extract bounding boxes from mask images of ADE20K dataset
- - Build some tests?
+# Description
+This script takes as input a dataset (for example ADE20K). After subsampling this dataset,
+it formats it so as to mimic "coco" or "imagenet" dataset for the mobile_app.
+More specifically, it replaces the existing annotation file from mobile_app with
+a new annotation file (corresponding to the new dataset) having the same format.
+Then it pushes images of the new dataset to the mobile phone.
+
+# Remarks 
+- coco not implemented yet
+- Input dataset must be either ADE20K or kanter
+
+
+# Example 
+
+List of commands for using ADE20K as classification test dataset in mobile app:
+```
+git clone https://github.com/mlperf/mobile_app.git
+python script.py --mobile_app_path=./mobile_app --N=300 --dataset=ADE20K --type=imagenet
+export ANDROID_HOME=Path/to/SDK # Ex: $HOME/Android/Sdk
+export ANDROID_NDK_HOME=Path/to/NDK # Ex: $ANDROID_HOME/ndk/(your version)
+bazel-2.2.0 build -c opt --cxxopt='--std=c++14' \
+    --fat_apk_cpu=x86,arm64-v8a,armeabi-v7a \
+    //java/org/mlperf/inference:mlperf_app
+adb install -r bazel-bin/java/org/mlperf/inference/mlperf_app.apk
+```

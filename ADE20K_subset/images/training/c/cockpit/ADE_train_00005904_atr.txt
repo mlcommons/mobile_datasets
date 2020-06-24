@@ -1,6 +1,0 @@
-001 # 0 # 0 # windowpane, window # window # ""
-002 # 0 # 0 # seat # seat # ""
-003 # 0 # 0 # controls # controls # ""
-004 # 0 # 0 # beam # beam # ""
-005 # 0 # 0 # marker # marker # ""
-006 # 0 # 0 # seat # seat # ""

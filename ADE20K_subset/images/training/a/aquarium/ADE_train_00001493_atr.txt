@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # rock, stone # rocks # ""
-003 # 0 # 0 # aquarium, fish tank, marine museum # aquarium # ""
-004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # people # ""
-005 # 0 # 0 # fish # fish # ""

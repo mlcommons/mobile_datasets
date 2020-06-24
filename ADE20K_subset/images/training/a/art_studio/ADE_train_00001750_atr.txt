@@ -1,7 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # painting, picture # picture # "painting"
-003 # 0 # 1 # cabinet # cabinet # ""
-004 # 0 # 1 # painting, picture # picture # "painting"
-005 # 0 # 1 # easel # easel # ""
-006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
-007 # 0 # 0 # paint box # paint box # ""

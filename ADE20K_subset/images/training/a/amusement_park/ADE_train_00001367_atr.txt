@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # tree # tree # ""
-003 # 0 # 0 # tree # tree # ""
-004 # 0 # 0 # park # park # ""
-005 # 0 # 0 # ferris wheel # ferris wheel # ""

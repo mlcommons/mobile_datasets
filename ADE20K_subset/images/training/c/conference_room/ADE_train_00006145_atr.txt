@@ -1,3 +1,0 @@
-001 # 0 # 0 # light, light source # light troffer # "diffused,general,on,surface"
-002 # 0 # 1 # light, light source # light troffer # "diffused,general,on,surface"
-003 # 0 # 0 # light, light source # light troffer # "diffused,general,on,surface"

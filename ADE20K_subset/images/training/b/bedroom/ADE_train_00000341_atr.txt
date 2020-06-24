@@ -1,6 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # door # door # ""
-004 # 0 # 0 # lamp # table lamp # "off"
-005 # 0 # 1 # table # night table # ""
-006 # 0 # 1 # bed # bed # ""

@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # "cloudy"
-002 # 0 # 0 # sea # sea water # ""
-003 # 0 # 0 # boat # boat # ""
-004 # 0 # 0 # rock, stone # rocks # ""
-005 # 0 # 0 # sand # sand beach # ""

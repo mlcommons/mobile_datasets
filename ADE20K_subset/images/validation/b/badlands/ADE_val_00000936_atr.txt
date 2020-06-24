@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # "cloudy"
-002 # 0 # 0 # land, ground, soil # land # ""
-003 # 0 # 0 # cliff, drop, drop-off # cliff # ""
-004 # 0 # 0 # land, ground, soil # land # ""
-005 # 0 # 0 # tree # trees # ""

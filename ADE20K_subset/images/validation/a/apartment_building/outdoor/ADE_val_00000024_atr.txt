@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # building, edifice # building # ""
-001 # 1 # 0 # window # window # ""
-002 # 1 # 0 # window # window # ""
-003 # 1 # 0 # window # window # ""
-004 # 1 # 0 # window # window # ""
-005 # 1 # 0 # window # window # ""
-006 # 1 # 1 # window # window # ""

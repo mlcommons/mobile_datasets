@@ -1,5 +1,0 @@
-001 # 0 # 0 # water # water # ""
-002 # 0 # 0 # arcade, colonnade # arcade # ""
-003 # 0 # 0 # grass # grass # ""
-004 # 0 # 0 # plant, flora, plant life # plants # ""
-005 # 0 # 0 # plant, flora, plant life # plants # ""

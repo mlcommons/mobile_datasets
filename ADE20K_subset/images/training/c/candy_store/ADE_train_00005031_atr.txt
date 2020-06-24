@@ -1,7 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # ceiling # ceiling # ""
-003 # 0 # 0 # candy track # candy track # ""
-004 # 0 # 0 # box # boxes # ""
-005 # 0 # 0 # pole # pole # ""
-006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
-007 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

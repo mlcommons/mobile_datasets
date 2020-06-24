@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # building, edifice # building # ""
-003 # 0 # 0 # airplane, aeroplane, plane # airplane # ""
-004 # 0 # 0 # airplane, aeroplane, plane # airplane # ""
-005 # 0 # 0 # runway # runway # ""
-006 # 0 # 0 # field # field # ""
-007 # 0 # 0 # building, edifice # building # ""
-008 # 0 # 0 # field # field # ""

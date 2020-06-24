@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # bullring # bullring # ""
-003 # 0 # 0 # bull # bull # ""
-004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "bullfighter"
-005 # 0 # 0 # cape # cape # ""

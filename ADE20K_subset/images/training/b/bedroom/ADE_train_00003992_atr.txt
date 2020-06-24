@@ -1,8 +1,0 @@
-001 # 0 # 0 # floor, flooring # floor # "wood"
-002 # 0 # 0 # bed # bed # "double size"
-003 # 0 # 0 # stands # stands # ""
-004 # 0 # 0 # base, pedestal, stand # stand # ""
-005 # 0 # 0 # stands # stands # ""
-006 # 0 # 0 # step, stair # step # ""
-007 # 0 # 0 # curtain, drape, drapery, mantle, pall # curtain # "opaque"
-008 # 0 # 0 # cushion # cushion # "stamping"

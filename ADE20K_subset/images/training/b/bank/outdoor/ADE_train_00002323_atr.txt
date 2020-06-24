@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # road, route # road # ""
-003 # 0 # 0 # building, edifice # buildings # ""
-004 # 0 # 0 # building, edifice # buildings # ""
-005 # 0 # 0 # building, edifice # building # ""
-006 # 0 # 0 # tree # tree # ""
-007 # 0 # 0 # tree # tree # ""
-008 # 0 # 0 # tree # tree # ""

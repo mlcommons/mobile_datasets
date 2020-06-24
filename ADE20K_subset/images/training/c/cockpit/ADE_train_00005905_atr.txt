@@ -1,5 +1,0 @@
-001 # 0 # 0 # camouflage # camouflage # ""
-002 # 0 # 0 # background # background # ""
-003 # 0 # 0 # background # background # ""
-004 # 0 # 0 # background # background # ""
-005 # 0 # 0 # controls # controls # ""

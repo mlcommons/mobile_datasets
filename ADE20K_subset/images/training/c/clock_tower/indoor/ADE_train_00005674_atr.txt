@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # floor, flooring # floor # ""
-003 # 0 # 1 # clock # clock # ""
-004 # 0 # 0 # stairway, staircase # staircase # ""
-005 # 0 # 0 # railing, rail # railing # ""

@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # field # field # ""
-003 # 0 # 0 # grass # grass # ""
-001 # 1 # 0 # cloud # cloud # ""
-002 # 1 # 0 # cloud # cloud # ""

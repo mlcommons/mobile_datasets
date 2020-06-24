@@ -1,5 +1,0 @@
-001 # 0 # 0 # ice, water ice # ice # ""
-002 # 0 # 0 # ice, water ice # ice # ""
-003 # 0 # 0 # ice, water ice # ice # ""
-004 # 0 # 0 # ice, water ice # ice # ""
-005 # 0 # 0 # stalactite # stalactite # ""

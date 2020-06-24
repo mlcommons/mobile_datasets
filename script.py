@@ -7,8 +7,11 @@ import zipfile
 import requests
 import subprocess
 import logging
-logging.basicConfig(level=logging.INFO)
+
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+
 """
 Description:
 This script takes as input a dataset (by default ADE20K). After subsampling this dataset,
@@ -46,6 +49,8 @@ class InputDataset:
     and implement the corresponding methods.
 
     Attributes:
+        yes_all: bool
+            if True, answers yes to all questions asked by the script (such as permission to remove folders)
         type: str ("imagenet" or "coco")
             type of the dataset one wants to mimic
         mobile_app_path: str
@@ -62,9 +67,8 @@ class InputDataset:
     def __init__(self, input_data_path, mobile_app_path, type, yes_all):
         self.yes_all = yes_all
         self.type = type
-        self.load_classes()
-        self.mobile_app_path = mobile_app_path
 
+        self.mobile_app_path = mobile_app_path
         self.tmp_path = os.path.join(self.mobile_app_path, "tmp_dataset_script") # temporary folder
         self.check_tmp_path()
 
@@ -77,6 +81,7 @@ class InputDataset:
         self.input_data_path = input_data_path
         if self.input_data_path is None:
             self.download_dataset()
+        self.load_classes()
 
     def check_tmp_path(self):
         """
@@ -105,12 +110,11 @@ class InputDataset:
         Loads classes labels and indices depending on self.type
         """
         if self.type == "imagenet":
-            url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+            #url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+            url = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
             logger.info("Loading imagenet classes")
-            imagenet_simple_labels = eval(requests.get(url).text)
-            logger.debug(imagenet_simple_labels)
-            # TODO: Check that there is no error in those classes
-            self.IMAGENET_CLASSES = dict(zip(imagenet_simple_labels, [i for i in range(1,len(imagenet_simple_labels)+1)]))
+            self.IMAGENET_CLASSES =  {v:k for (k,v) in eval(requests.get(url).text).items()}
+            logger.debug(self.IMAGENET_CLASSES)
 
     def download_dataset(self):
         """
@@ -234,7 +238,7 @@ class ADE20KDataset(InputDataset):
         self.in_annotations = {}
 
     def download_dataset(self):
-        DEV = True
+        DEV = False
         if DEV: # TODO: remove
             dataset_name = "ADE20K_subset"
             ADE20K_url =  'https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip'
@@ -261,22 +265,24 @@ class ADE20KDataset(InputDataset):
             selected_img_path: list of path to images we want to keep in the new dataset
         """
         selected_img_path = []
-        logger.debug("Find classes which are common to imagenet and ADE20K")
+        logger.info("Subsampling ADE20K...")
         for set_path in [self.train_path, self.val_path]:
             for letter in os.listdir(set_path):
-                logger.debug(letter)
+                logger.debug("Letter", letter)
                 letter_path = os.path.join(set_path, letter)
                 ADE_letter_classes = os.listdir(letter_path)
                 for cur_class in ADE_letter_classes:
                    spaced_class = " ".join(cur_class.split("_"))
-                   if spaced_class in self.IMAGENET_CLASSES:
-                       logger.debug(f"Keep {spaced_class} which is shared both by imagenet and ADE20K")
-                       class_path = os.path.join(letter_path, cur_class)
-                       for f in os.listdir(class_path):
-                           if f.endswith(".jpg"):
-                               img_path = os.path.join(class_path, f)
-                               selected_img_path.append(img_path)
-                               self.in_annotations[img_path] = spaced_class
+                   for imagenet_class in self.IMAGENET_CLASSES:
+                       if spaced_class in imagenet_class.split(", "):
+                           logger.debug(f"Keep ADE20K class: {spaced_class}, imagenet: {imagenet_class.split(', ')}")
+                           class_path = os.path.join(letter_path, cur_class)
+                           for f in os.listdir(class_path):
+                               if f.endswith(".jpg"):
+                                   img_path = os.path.join(class_path, f)
+                                   selected_img_path.append(img_path)
+                                   self.in_annotations[img_path] = self.IMAGENET_CLASSES[imagenet_class]
+
         if policy == "random":
             if N < len(selected_img_path):
                 selected_img_path = random.sample(selected_img_path, N)
@@ -285,8 +291,8 @@ class ADE20KDataset(InputDataset):
 
     def find_label(self, img_path):
         if self.type == "imagenet":
-            label = self.IMAGENET_CLASSES[self.in_annotations[img_path]]
-            logger.debug(f"Img {img_path}, is {self.in_annotations[img_path]}, imagenet label {label}")
+            label = self.in_annotations[img_path]
+            logger.debug(f"Img {img_path}, imagenet label {label}")
         return label
 
 
@@ -347,9 +353,11 @@ def main():
                                 mobile_app_path=args.mobile_app_path,
                                 type=args.type,
                                 yes_all=args.y)
-    
+
     selected_img_path = input_dataset.subsample(N=args.N)
     input_dataset.process_dataset(selected_img_path=selected_img_path)
+
+
 
 if __name__ == '__main__':
     main()

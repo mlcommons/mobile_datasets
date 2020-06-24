@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # ceiling # ceiling # ""
-003 # 0 # 0 # earth, ground # ground # ""
-004 # 0 # 0 # straw # straw # ""
-005 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "chick"

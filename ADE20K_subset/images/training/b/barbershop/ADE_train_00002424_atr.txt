@@ -1,8 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # floor, flooring # floor # ""
-003 # 0 # 1 # cabinet # cabinet # ""
-004 # 0 # 1 # cabinet # cabinet # ""
-005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
-006 # 0 # 1 # hairdresser chair # hairdresser chair # ""
-007 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "sitting"
-008 # 0 # 0 # hairdresser chair # hairdresser chair # ""

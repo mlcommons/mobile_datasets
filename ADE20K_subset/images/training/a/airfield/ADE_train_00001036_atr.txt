@@ -1,6 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # tree # trees # ""
-003 # 0 # 0 # earth, ground # ground # "grass"
-004 # 0 # 0 # airplane, aeroplane, plane # airplane # ""
-005 # 0 # 0 # signboard, sign # sign # ""
-006 # 0 # 0 # plant, flora, plant life # plant # ""

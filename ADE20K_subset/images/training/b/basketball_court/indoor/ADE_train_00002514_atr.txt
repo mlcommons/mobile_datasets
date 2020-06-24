@@ -1,8 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # wall # wall # ""
-004 # 0 # 0 # ceiling # ceiling # ""
-005 # 0 # 0 # court # court # ""
-006 # 0 # 0 # spotlight, spot # ceiling spotlight # "on"
-007 # 0 # 0 # basket, basketball hoop, hoop # basketball hoop # ""
-008 # 0 # 1 # basket, basketball hoop, hoop # basketball hoop # ""

@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # "cloudy"
-002 # 0 # 0 # field # field # ""
-003 # 0 # 0 # field # field # ""
-004 # 0 # 0 # path # path # ""
-005 # 0 # 0 # field # field # ""

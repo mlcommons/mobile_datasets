@@ -1,6 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # building, edifice # building # "castle"
-003 # 0 # 0 # earth, ground # ground # ""
-004 # 0 # 0 # water # water # ""
-005 # 0 # 0 # tree # trees # ""
-006 # 0 # 0 # plant, flora, plant life # plant # ""

@@ -1,8 +1,0 @@
-001 # 0 # 1 # cliff, drop, drop-off # cliff # ""
-002 # 0 # 1 # cliff, drop, drop-off # cliff # ""
-003 # 0 # 0 # river # river water # ""
-004 # 0 # 0 # river # river water # ""
-005 # 0 # 0 # rock, stone # rock # "ground"
-006 # 0 # 0 # canyon # canyon # "background"
-007 # 0 # 0 # rock, stone # rock # "ground"
-008 # 0 # 1 # tree # tree # ""

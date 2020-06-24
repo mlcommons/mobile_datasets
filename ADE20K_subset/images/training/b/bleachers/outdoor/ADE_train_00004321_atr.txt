@@ -1,5 +1,0 @@
-001 # 0 # 0 # building, edifice # building # ""
-002 # 0 # 0 # sand # sand # ""
-003 # 0 # 0 # grandstand, covered stand # grandstand # ""
-004 # 0 # 0 # earth, ground # ground # ""
-005 # 0 # 0 # tractor # tractor # ""

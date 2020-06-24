@@ -1,5 +1,0 @@
-001 # 0 # 0 # grass # grass # ""
-002 # 0 # 0 # fence, fencing # fence # ""
-003 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "hen"
-004 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "cockerel"
-005 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "hen"

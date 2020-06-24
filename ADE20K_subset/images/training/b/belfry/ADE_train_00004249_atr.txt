@@ -1,8 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # windowpane, window # window # ""
-004 # 0 # 1 # windowpane, window # window # ""
-005 # 0 # 0 # bell # bell # ""
-006 # 0 # 0 # bell # bell # ""
-007 # 0 # 0 # beam # beam # ""
-008 # 0 # 0 # bannister, banister, balustrade, balusters, handrail # balustrade # ""

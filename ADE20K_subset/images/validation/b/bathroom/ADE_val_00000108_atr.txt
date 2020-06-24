@@ -1,6 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # bottle # bottle # ""
-004 # 0 # 0 # shower # shower # ""
-005 # 0 # 0 # curtain, drape, drapery, mantle, pall # curtain # ""
-006 # 0 # 0 # towel # towel # ""

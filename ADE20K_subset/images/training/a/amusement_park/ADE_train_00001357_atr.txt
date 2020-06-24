@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # earth, ground # ground # ""
-003 # 0 # 0 # fence, fencing # fence # ""
-004 # 0 # 0 # seat # seat # ""
-005 # 0 # 0 # merry-go-round # merry-go-round # ""
-006 # 0 # 0 # pole # pole # ""
-007 # 0 # 0 # ride # ride # ""
-008 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

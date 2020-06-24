@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-001 # 1 # 0 # cloud # cloud # ""
-002 # 1 # 0 # cloud # cloud # ""
-002 # 0 # 0 # sand # sand # "dunes"
-003 # 0 # 0 # mountain, mount # mountain # ""

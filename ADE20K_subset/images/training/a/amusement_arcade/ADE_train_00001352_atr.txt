@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # floor, flooring # floor # ""
-003 # 0 # 0 # arcade machine # arcade machine # ""
-004 # 0 # 1 # arcade machine # arcade machine # ""
-005 # 0 # 1 # arcade machine # arcade machine # ""

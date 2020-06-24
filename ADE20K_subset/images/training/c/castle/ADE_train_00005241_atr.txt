@@ -1,8 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # grass # grass # ""
-003 # 0 # 0 # board, plank # board # ""
-004 # 0 # 0 # tree # trees # ""
-005 # 0 # 0 # board, plank # board # ""
-006 # 0 # 0 # structure # structure # ""
-007 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
-008 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

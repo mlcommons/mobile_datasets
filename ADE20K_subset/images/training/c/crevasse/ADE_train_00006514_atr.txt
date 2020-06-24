@@ -1,6 +1,0 @@
-001 # 0 # 0 # wall # wall # "ice"
-002 # 0 # 0 # wall # wall # "ice"
-003 # 0 # 0 # wall # wall # "ice"
-004 # 0 # 0 # mountain, mount # mountain # ""
-005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
-001 # 1 # 0 # head # head # ""

@@ -1,7 +1,0 @@
-001 # 0 # 0 # building, edifice # building # ""
-001 # 1 # 0 # roof # roof # ""
-002 # 1 # 0 # balcony # balcony # ""
-002 # 0 # 0 # streetlight, street lamp # street light # ""
-003 # 0 # 0 # streetlight, street lamp # street light # ""
-004 # 0 # 0 # tree # tree # ""
-003 # 1 # 0 # railing # railing # ""

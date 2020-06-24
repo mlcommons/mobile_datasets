@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # wall # wall # ""
-003 # 0 # 0 # curtain, drape, drapery, mantle, pall # curtain # ""
-004 # 0 # 0 # mirror # mirror # ""
-005 # 0 # 1 # windowpane, window # window # ""

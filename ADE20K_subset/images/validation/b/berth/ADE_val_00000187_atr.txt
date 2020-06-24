@@ -1,8 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # ceiling # ceiling # ""
-003 # 0 # 0 # compartment # compartment # ""
-004 # 0 # 0 # bed # bed # ""
-005 # 0 # 0 # windowpane, window # window # ""
-006 # 0 # 1 # jacket # jacket # ""
-007 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
-001 # 1 # 0 # head # head # ""

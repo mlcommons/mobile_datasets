@@ -1,6 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # mountain, mount # mountain # "snowy"
-003 # 0 # 0 # earth, ground # ground # "snowy"
-004 # 0 # 0 # crevasse # crevasse # ""
-005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
-006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

@@ -1,6 +1,0 @@
-001 # 0 # 0 # wall # wall # ""
-002 # 0 # 0 # windowpane, window # window # ""
-003 # 0 # 1 # bed # bed # ""
-004 # 0 # 0 # bag # bag # ""
-005 # 0 # 0 # blanket, cover # blanket # ""
-006 # 0 # 1 # pillow # pillow # ""

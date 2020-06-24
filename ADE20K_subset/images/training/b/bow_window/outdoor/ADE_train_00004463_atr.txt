@@ -1,7 +1,0 @@
-001 # 0 # 0 # building, edifice # building # ""
-002 # 0 # 0 # earth, ground # ground # ""
-001 # 1 # 0 # window # window # "bay"
-003 # 0 # 0 # plant, flora, plant life # plants # ""
-002 # 1 # 0 # window # window # ""
-003 # 1 # 0 # window # window # ""
-004 # 1 # 0 # window # window # ""

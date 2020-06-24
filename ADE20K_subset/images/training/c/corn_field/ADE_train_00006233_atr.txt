@@ -1,5 +1,0 @@
-001 # 0 # 0 # sky # sky # "cloudy"
-002 # 0 # 0 # plant, flora, plant life # plants # ""
-003 # 0 # 0 # tree # tree # ""
-004 # 0 # 0 # tree # tree # ""
-005 # 0 # 0 # tree # tree # ""

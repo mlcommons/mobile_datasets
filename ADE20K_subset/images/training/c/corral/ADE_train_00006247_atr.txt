@@ -1,5 +1,0 @@
-001 # 0 # 0 # wall # wall # "stones"
-002 # 0 # 0 # field # field # ""
-003 # 0 # 0 # path # path # ""
-004 # 0 # 0 # fence, fencing # fence # ""
-005 # 0 # 0 # fence, fencing # fence # ""

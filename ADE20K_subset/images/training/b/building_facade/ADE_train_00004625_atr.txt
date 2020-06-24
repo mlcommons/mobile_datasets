@@ -1,6 +1,0 @@
-001 # 0 # 0 # road, route # road # ""
-002 # 0 # 0 # sidewalk, pavement # sidewalk # ""
-003 # 0 # 0 # building, edifice # building # ""
-004 # 0 # 0 # pot # pot # ""
-001 # 1 # 0 # door # door # ""
-005 # 0 # 0 # plant, flora, plant life # plant # ""

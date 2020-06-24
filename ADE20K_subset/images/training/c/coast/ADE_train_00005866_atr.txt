@@ -1,7 +1,0 @@
-001 # 0 # 0 # sky # sky # ""
-002 # 0 # 0 # sea # sea water # ""
-003 # 0 # 0 # sand # sand beach # ""
-004 # 0 # 0 # mountain, mount # mountain # ""
-001 # 1 # 0 # cloud # cloud # ""
-002 # 1 # 0 # cloud # cloud # ""
-003 # 1 # 0 # cloud # cloud # ""
