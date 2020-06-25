@@ -8,7 +8,7 @@ import requests
 import subprocess
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -154,7 +154,7 @@ class InputDataset:
                     #self.convert_img(img_path): not useful for ADE20K (already jpg image) but might be necessary for other datasets
                     label = self.find_label(img_path)
                     new_img_name = f"ILSVRC2012_val_{i+1:08}.JPEG"
-                    logger.debug("Copying {img_path} to \n {os.path.join(self.out_img_path, new_img_name)}")
+                    logger.debug(f"Copying {img_path} to \n {os.path.join(self.out_img_path, new_img_name)}")
                     shutil.copyfile(img_path,
                                     os.path.join(self.out_img_path, new_img_name))
                     new_ann_file.write(str(label) + "\n")
