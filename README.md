@@ -21,7 +21,7 @@ Then it pushes images of the new dataset to the mobile phone.
 List of commands for using ADE20K as classification test dataset in mobile app:
 ```
 git clone https://github.com/mlperf/mobile_app.git
-python script.py --mobile_app_path=./mobile_app --N=300 --dataset=ADE20K --type=imagenet
+python script.py --mobile_app_path=./mobile_app --N=400 --dataset=ADE20K --type=imagenet
 export ANDROID_HOME=Path/to/SDK # Ex: $HOME/Android/Sdk
 export ANDROID_NDK_HOME=Path/to/NDK # Ex: $ANDROID_HOME/ndk/(your version)
 bazel-2.2.0 build -c opt --cxxopt='--std=c++14' \
@@ -43,9 +43,13 @@ root/
 │       │   ...
 ```
 
+Running those commands and launching the app gave me ~57% accuracy.
+
 ## Main steps of the script
-The main steps followed by the script, when `python script.py --mobile_app_path=./mobile_app --N=300 --dataset=ADE20K --type=imagenet` is run are:
-* Download ADE20K from official url, and unzip in a tmp folder
+The main steps followed by the script, when `python script.py --mobile_app_path=./mobile_app --N=400 --dataset=ADE20K --type=imagenet` is run are:
+* Create a temporary folder in ./mobile_app
+* Download ADE20K from official [url](https://groups.csail.mit.edu/vision/datasets/ADE20K), and unzip in the tmp folder
 * Subsample, format images from ADE20K and save them in the tmp folder
 * Push new images to the sdcard of the phone
+* Remove the temporary folder
 * Update the annotation file ./mobile_app/java/org/mlperf/inference/assets/imagenet_val.txt accordingly to the new images
