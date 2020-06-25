@@ -1,5 +1,7 @@
 Script which converts a given dataset to imagenet/coco-like dataset for speed tests.
 
+# Requirements
+- python3
 
 # Description
 This script takes as input a dataset (for example ADE20K). After subsampling this dataset,
