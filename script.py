@@ -25,6 +25,7 @@ adb install -r bazel-bin/java/org/mlperf/inference/mlperf_app.apk
 ```
 """
 
+import sys
 import argparse
 import os
 import random
@@ -100,8 +101,8 @@ class InputDataset:
         """
         while os.path.isdir(self.tmp_path):
             if not self.yes_all:
-                choice_tmp = input(f"{self.tmp_path} could not be created, folder already exists. Do you want to:\n 1. Remove this folder \n 2. Create another temporary folder? [1/2] \n")
-            if self.yes_all or choice_tmp == "1":
+                delete = input(f"{self.tmp_path} could not be created, folder already exists. Do you want to remove this folder? (y/n) \n")
+            if self.yes_all or delete == "y":
                 rm_tmp = subprocess.run(["rm", "-r", self.tmp_path],
                                         stderr=subprocess.PIPE,
                                         universal_newlines=True)
@@ -109,11 +110,8 @@ class InputDataset:
                     logger.info(f"{self.tmp_path} has been removed.")
                 else:
                     logger.error(f"{self.tmp_path} couldn't be removed.", rm_tmp.stderr)
-            elif choice_tmp == "2":
-                new_tmp = input("Enter a name for the new tmp folder: ")
-                self.tmp_path = os.path.join(self.mobile_app_path, new_tmp)
             else:
-                logger.error("Please enter a valid answer (1 or 2).")
+                logger.error("Please enter a valid answer (y or n).")
 
     def load_classes(self):
         """
@@ -168,7 +166,7 @@ class InputDataset:
                     new_ann_file.write(str(label) + "\n")
 
         #### Push to mobile ####
-        mobile_dataset_path = os.path.join('sdcard','mlperf_datasets', self.type)
+        mobile_dataset_path = os.path.join(os.sep,'sdcard','mlperf_datasets', self.type)
 
         # Removes existing imagenet folder from the phone
         phone_dataset = subprocess.run(["adb", "shell", "ls", mobile_dataset_path],
@@ -176,15 +174,6 @@ class InputDataset:
                                         universal_newlines=True)
         if phone_dataset.returncode == 0:
             print(f"{mobile_dataset_path} exists. Its elements will be deleted.")
-            dataset_folder = phone_dataset.stdout.split('\n')[:-1]
-            for folder in dataset_folder:
-                folder_elements = subprocess.run(["adb", "shell", "ls", os.path.join(mobile_dataset_path, folder)],
-                                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                                universal_newlines=True)
-                print(f"{os.path.join(mobile_dataset_path, folder)} will be deleted.")
-                if folder_elements.returncode == 0:
-                    print(f"Elements of {os.path.join(mobile_dataset_path, folder)} (listed below) will be deleted.")
-                    print(folder_elements.stdout)
 
             delete = "n"
             while delete != "y":
@@ -200,15 +189,20 @@ class InputDataset:
                     break
                 elif delete == "n":
                     logger.error("Cannot pursue without removing those elements.")
+                    sys.exit()
                 else:
                     logger.error("Please enter a valid answer (y or n).")
 
         logger.info(f"Creating {os.path.join(mobile_dataset_path,'img')} directory on the phone.")
         create_dir = subprocess.run(["adb", "shell", "mkdir", "-p", os.path.join(mobile_dataset_path,"img")])
         logger.info(f"Pushing {self.out_img_path} to the phone at {mobile_dataset_path}")
-        push = subprocess.run(["adb", "push", self.out_img_path, mobile_dataset_path])
 
-        assert create_dir.returncode == push.returncode == 0
+        try:
+            subprocess.check_call(["adb", "push", self.out_img_path, mobile_dataset_path], stdout=sys.stdout, stderr=subprocess.STDOUT)
+        except sp.CalledProcessError as e:
+            raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+
+        assert create_dir.returncode == 0
         if not self.yes_all:
             remove_tmp_folder = input(f"Do you want to remove the temporary folder located at {self.tmp_path} which has been created by the script? [y/n] \n")
         if self.yes_all or remove_tmp_folder == 'y':
@@ -262,9 +256,10 @@ class ADE20KDataset(InputDataset):
                 self.input_data_path = zip_path[:-4]
                 break
             elif download == "n":
-                print(f"Cannot pursue without downloading the dataset.")
+                logger.error(f"Cannot pursue without downloading the dataset.")
+                sys.exit()
             else:
-                print(f"Please enter a valid answer (y or n).")
+                logger.error("Please enter a valid answer (y or n).")
 
 
     def subsample(self, N, policy="random"):
