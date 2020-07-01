@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 
 # CONSTANTS
 IMAGENET_CLASSES_URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
+COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
 
 ADE20K_URL =  'https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip' ## For development, can use this link, otherwise it'll download the entire dataset (3GB)
 #ADE20K_URL = "https://groups.csail.mit.edu/vision/datasets/ADE20K/ADE20K_2016_07_26.zip"
