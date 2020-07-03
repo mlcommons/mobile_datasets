@@ -13,9 +13,10 @@ Then it pushes images of the new dataset to the mobile phone.
 
 
 # Remarks
-- coco not implemented yet
 - Input dataset must be either ADE20K or kanter
 
+## Remarks for coco
+- For coco, images are resized to 300x300 (and bounding boxes are adapted) so as to follow the [mobile_app documentation](https://github.com/mlperf/mobile_app/blob/master/cpp/datasets/README.md). (The value 300x300 is hard coded for the moment.)
 
 # Example
 

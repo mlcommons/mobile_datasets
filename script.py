@@ -24,7 +24,7 @@ bazel-2.2.0 build -c opt --cxxopt='--std=c++14' \
 adb install -r bazel-bin/java/org/mlperf/inference/mlperf_app.apk
 ```
 """
-
+import cv2
 import sys
 import argparse
 import os
@@ -79,7 +79,12 @@ class InputDataset:
     """
     def __init__(self, input_data_path, mobile_app_path, type, yes_all):
         self.yes_all = yes_all
+
         self.type = type
+        self.new_img_size = None
+        if self.type == "coco":
+            self.new_img_size = (300, 300)
+
 
         self.mobile_app_path = mobile_app_path
         self.tmp_path = os.path.join(self.mobile_app_path, "tmp_dataset_script") # temporary folder
@@ -156,6 +161,21 @@ class InputDataset:
         """
         raise ValueError("input_data_path must not be None")
 
+    def process_single_img(self, img_path, new_img_path):
+        """
+        Processes a single image.
+        For imagenet, it just copies the image to the new_img_path.
+        For coco, it rescale to self.new_img_size shape, and save to the new_img_path.
+        """
+        if self.type == "imagenet":
+            logger.debug(f"Copying {img_path} to \n {new_img_path}")
+            shutil.copyfile(img_path,
+                            new_img_path)
+        elif self.type == "coco":
+            logger.debug(f"Rescaling {img_path} to shape {self.new_img_size} and save to \n {new_img_path}")
+            img = cv2.imread(img_path)
+            resized_img = cv2.resize(img, self.new_img_size, interpolation=cv2.INTER_LINEAR)
+            cv2.imwrite(new_img_path, resized_img)
 
     def process_dataset(self,
                        selected_img_path
@@ -184,9 +204,9 @@ class InputDataset:
                     new_img_name = f"ILSVRC2012_val_{i+1:08}.JPEG"
                 elif self.type == "coco":
                     new_img_name = f"{i+1:012}.jpg"
-                logger.debug(f"Copying {img_path} to \n {os.path.join(self.out_img_path, new_img_name)}")
-                shutil.copyfile(img_path,
-                                os.path.join(self.out_img_path, new_img_name))
+
+                self.process_single_img(img_path=img_path,
+                                        new_img_path=os.path.join(self.out_img_path, new_img_name))
 
                 self.write_annotation(new_ann_file=new_ann_file, img_path=img_path, new_img_name=new_img_name)
 
@@ -378,6 +398,9 @@ class ADE20KDataset(InputDataset):
                             if label_correspondance:
                                 logger.debug(f"{img_path}, label correspondance {label_correspondance}")
                                 self.in_annotations[img_path] = {}
+                                # scaling factors
+                                sr = self.new_img_size[0]/n_row
+                                sc = self.new_img_size[1]/n_col
                                 for r in range(n_row):
                                     for c in range(n_col):
                                         if class_seg_img[r,c] in label_correspondance:
@@ -385,12 +408,12 @@ class ADE20KDataset(InputDataset):
                                             if object_id not in self.in_annotations[img_path]:
                                                 self.in_annotations[img_path][object_id] = {}
                                                 self.in_annotations[img_path][object_id]["label"] = label_correspondance[class_seg_img[r,c]]
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [r/n_row, r/n_row, c/n_col, c/n_col]
+                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [r*sr, r*sr, c*sc, c*sc]
                                             else:
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r/n_row),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r/n_row),
-                                                                                                               min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c/n_col),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c/n_col)]
+                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r*sr),
+                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r*sr),
+                                                                                                               min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c*sc),
+                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
                                 intersecting_img.append(img_path)
 
         logger.info(f"Number of intersecting images : {len(intersecting_img)}")
