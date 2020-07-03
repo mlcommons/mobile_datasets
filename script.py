@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 # CONSTANTS
 IMAGENET_CLASSES_URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
 COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
-
+COCO_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 ADE20K_URL =  'https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip' ## For development, can use this link, otherwise it'll download the entire dataset (3GB)
 #ADE20K_URL = "https://groups.csail.mit.edu/vision/datasets/ADE20K/ADE20K_2016_07_26.zip"
 
@@ -128,10 +128,24 @@ class InputDataset:
             self.IMAGENET_CLASSES =  {v:k for (k,v) in eval(requests.get(IMAGENET_CLASSES_URL).text).items()}
             logger.debug(self.IMAGENET_CLASSES)
         if self.type == "coco":
-            list_coco_classes = (requests.get(COCO_CLASSES_URL).text).split("\n")
-            self.COCO_CLASSES = dict(zip(list_coco_classes, [i+1 for i in range(len(list_coco_classes))]))
-            self.COCO_CLASSES_reverse = dict(zip([i+1 for i in range(len(list_coco_classes))],list_coco_classes))
-
+            # list_coco_classes = (requests.get(COCO_CLASSES_URL).text).split("\n")
+            # self.COCO_CLASSES = dict(zip(list_coco_classes, [i+1 for i in range(len(list_coco_classes))]))
+            # self.COCO_CLASSES_reverse = dict(zip([i+1 for i in range(len(list_coco_classes))],list_coco_classes))
+            import json
+            logger.info(f"Downloading coco annotation classes to {self.tmp_path}...")
+            zip_path, hdrs = urllib.request.urlretrieve(COCO_ANN_URL, os.path.join(self.tmp_path,
+                                                                                   "annotations_trainval2017.zip"))
+            logger.info(f"Extracting {zip_path} to temporary folder {self.tmp_path}...")
+            with zipfile.ZipFile(f"{zip_path}", 'r') as z:
+                z.extractall(f"{self.tmp_path}")
+            annot_json_path =  os.path.join(self.tmp_path,
+                                            "annotations", "instances_val2017.json")
+            categories = json.load(open(annot_json_path, 'r'))['categories']
+            ids = list(map(lambda d: d['id'], categories))
+            labels = list(map(lambda d: d['name'], categories))
+            self.COCO_CLASSES_reverse = dict(zip(ids, labels))
+            self.COCO_CLASSES = dict(zip(labels, ids))
+            logger.debug(self.COCO_CLASSES)
     def download_dataset(self):
         """
         Downloads dataset from a url to the temp folder self.tmp_path and updates self.input_data_path accordingly.
@@ -366,12 +380,12 @@ class ADE20KDataset(InputDataset):
                                             if object_id not in self.in_annotations[img_path]:
                                                 self.in_annotations[img_path][object_id] = {}
                                                 self.in_annotations[img_path][object_id]["label"] = label_correspondance[class_seg_img[r,c]]
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [r/255, r/255, c/255, c/255]
+                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [r/n_row, r/n_row, c/n_col, c/n_col]
                                             else:
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r/255),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r/255),
-                                                                                                               min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c/255),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c/255)]
+                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r/n_row),
+                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r/n_row),
+                                                                                                               min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c/n_col),
+                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c/n_col)]
                                 intersecting_img.append(img_path)
 
         logger.info(f"Number of intersecting images : {len(intersecting_img)}")
