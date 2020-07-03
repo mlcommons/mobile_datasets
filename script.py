@@ -109,15 +109,17 @@ class InputDataset:
             if not self.yes_all:
                 delete = input(f"{self.tmp_path} could not be created, folder already exists. Do you want to remove this folder? (y/n) \n")
             if self.yes_all or delete == "y":
-                rm_tmp = subprocess.run(["rm", "-r", self.tmp_path],
+                try:
+                    rm_tmp = subprocess.run(["rm", "-r", self.tmp_path], check=True,
                                         stderr=subprocess.PIPE,
                                         universal_newlines=True)
-                if rm_tmp.returncode == 0:
                     logger.info(f"{self.tmp_path} has been removed.")
-                else:
-                    logger.error(f"{self.tmp_path} couldn't be removed.", rm_tmp.stderr)
+                except subprocess.CalledProcessError as e:
+                    raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.stderr))
+
             elif delete == "n":
                 logger.error("Cannot pursue without deleting folder.")
+                sys.exit()
             else:
                 logger.error("Please enter a valid answer (y or n).")
 
@@ -194,23 +196,20 @@ class InputDataset:
         mobile_dataset_path = os.path.join(os.sep,'sdcard','mlperf_datasets', self.type)
 
         # Removes existing imagenet folder from the phone
-        phone_dataset = subprocess.run(["adb", "shell", "ls", mobile_dataset_path],
-                                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                        universal_newlines=True)
+        phone_dataset = subprocess.run(["adb", "shell", "ls", mobile_dataset_path], stderr=subprocess.DEVNULL)
         if phone_dataset.returncode == 0:
             print(f"{mobile_dataset_path} exists. Its elements will be deleted.")
-
             delete = "n"
             while delete != "y":
                 if not self.yes_all:
                     delete = input("Do you want to continue? [y/n] \n")
                 if self.yes_all or delete == "y":
-                    rm_type = subprocess.run(["adb", "shell", "rm", "-r", mobile_dataset_path],
+                    try:
+                        subprocess.run(["adb", "shell", "rm", "-r", mobile_dataset_path], check=True,
                                              stderr=subprocess.PIPE, universal_newlines=True)
-                    if rm_type.returncode == 0:
                         logger.info(f"{mobile_dataset_path} folder has been removed from the phone.")
-                    else:
-                        logger.error(f"Cannot remove {mobile_dataset_path}.", rm_type.stderr)
+                    except subprocess.CalledProcessError as e:
+                        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.stderr))
                     break
                 elif delete == "n":
                     logger.error("Cannot pursue without removing those elements.")
@@ -219,19 +218,23 @@ class InputDataset:
                     logger.error("Please enter a valid answer (y or n).")
 
         logger.info(f"Creating {os.path.join(mobile_dataset_path,'img')} directory on the phone.")
-        create_dir = subprocess.run(["adb", "shell", "mkdir", "-p", os.path.join(mobile_dataset_path,"img")])
-        logger.info(f"Pushing {self.out_img_path} to the phone at {mobile_dataset_path}")
+        try:
+            subprocess.run(["adb", "shell", "mkdir", "-p", os.path.join(mobile_dataset_path,"img")], check=True,
+                            stderr=subprocess.PIPE, universal_newlines=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.stderr))
 
+        logger.info(f"Pushing {self.out_img_path} to the phone at {mobile_dataset_path}")
         try:
             subprocess.check_call(["adb", "push", self.out_img_path, mobile_dataset_path], stdout=sys.stdout, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-        assert create_dir.returncode == 0
+
         if not self.yes_all:
             remove_tmp_folder = input(f"Do you want to remove the temporary folder located at {self.tmp_path} which has been created by the script? [y/n] \n")
         if self.yes_all or remove_tmp_folder == 'y':
-            clean = subprocess.run(["rm", "-r", self.tmp_path])
+            subprocess.run(["rm", "-r", self.tmp_path], check=True)
             logger.info(f"{self.tmp_path} folder has been removed.")
 
 
@@ -485,9 +488,9 @@ def main():
     parser.add_argument("--subsampling_strategy", type=str.lower, help="random or balanced", choices=["random", "balanced"], default="random")
     args = parser.parse_args()
 
-    adb_devices = subprocess.check_output(["adb", "devices"], universal_newlines=True)
-    assert len(adb_devices.split('\n')) > 3, "No device attached. Please connect your phone."
-    logger.info(adb_devices)
+    adb_devices = subprocess.run(["adb", "devices"], stdout=subprocess.PIPE, universal_newlines=True, check=True)
+    assert len(adb_devices.stdout.split('\n')) > 3, "No device attached. Please connect your phone."
+    logger.info(adb_devices.stdout)
 
     input_data_path = args.input_data_path
     if args.dataset == "kanter":
