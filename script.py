@@ -116,6 +116,8 @@ class InputDataset:
                     logger.info(f"{self.tmp_path} has been removed.")
                 else:
                     logger.error(f"{self.tmp_path} couldn't be removed.", rm_tmp.stderr)
+            elif delete == "n":
+                logger.error("Cannot pursue without deleting folder.")
             else:
                 logger.error("Please enter a valid answer (y or n).")
 
@@ -222,7 +224,7 @@ class InputDataset:
 
         try:
             subprocess.check_call(["adb", "push", self.out_img_path, mobile_dataset_path], stdout=sys.stdout, stderr=subprocess.STDOUT)
-        except sp.CalledProcessError as e:
+        except subprocess.CalledProcessError as e:
             raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
         assert create_dir.returncode == 0
@@ -483,8 +485,9 @@ def main():
     parser.add_argument("--subsampling_strategy", type=str.lower, help="random or balanced", choices=["random", "balanced"], default="random")
     args = parser.parse_args()
 
-    subprocess.check_call(["adb", "devices"])
-
+    adb_devices = subprocess.check_output(["adb", "devices"], universal_newlines=True)
+    assert len(adb_devices.split('\n')) > 3, "No device attached. Please connect your phone."
+    logger.info(adb_devices)
 
     input_data_path = args.input_data_path
     if args.dataset == "kanter":
