@@ -399,8 +399,8 @@ class ADE20KDataset(InputDataset):
                                 logger.debug(f"{img_path}, label correspondance {label_correspondance}")
                                 self.in_annotations[img_path] = {}
                                 # scaling factors
-                                sr = self.new_img_size[0]/n_row
-                                sc = self.new_img_size[1]/n_col
+                                sr = 1/n_row
+                                sc = 1/n_col
                                 for r in range(n_row):
                                     for c in range(n_col):
                                         if class_seg_img[r,c] in label_correspondance:
