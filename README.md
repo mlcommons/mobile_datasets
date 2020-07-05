@@ -2,6 +2,8 @@ Script which converts a given dataset to imagenet/coco-like dataset for speed te
 
 # Requirements
 - python3
+- cv2
+- matplotlib, numpy, json (TODO: remove?)
 
 # Description
 This script takes as input a dataset (for example ADE20K). After subsampling this dataset,
@@ -24,7 +26,7 @@ Then it pushes images of the new dataset to the mobile phone.
 List of commands for using ADE20K as classification test dataset in mobile app:
 ```
 git clone https://github.com/mlperf/mobile_app.git
-python script.py --mobile_app_path=./mobile_app --N=400 --dataset=ADE20K --type=imagenet
+python script.py --mobile_app_path=./mobile_app --N=400 --dataset=ADE20K --type=imagenet --subsampling_strategy=random
 export ANDROID_HOME=Path/to/SDK # Ex: $HOME/Android/Sdk
 export ANDROID_NDK_HOME=Path/to/NDK # Ex: $ANDROID_HOME/ndk/(your version)
 bazel-2.2.0 build -c opt --cxxopt='--std=c++14' \
