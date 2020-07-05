@@ -1,4 +1,3 @@
-
 """
 Description:
 This script takes as input a dataset (by default ADE20K). After subsampling this dataset,
@@ -6,24 +5,8 @@ it formats it so as to mimic "coco" or "imagenet" dataset for the mobile_app.
 More specifically, it replaces the existing annotation file from mobile_app with
 a new annotation file (corresponding to the new dataset) having the same format.
 Then it pushes images of the new dataset to the mobile phone.
-
-Remarks:
-- coco not implemented yet
-- Input dataset must be either ADE20K or kanter
-
-
-Example list of commands for using ADE20K as classification test dataset:
-```
-git clone https://github.com/mlperf/mobile_app.git
-python script.py --mobile_app_path=./mobile_app --N=300 --dataset=ADE20K --type=imagenet --subsampling_strategy=random
-export ANDROID_HOME=Path/to/SDK # Ex: $HOME/Android/Sdk
-export ANDROID_NDK_HOME=Path/to/NDK # Ex: $ANDROID_HOME/ndk/(your version)
-bazel-2.2.0 build -c opt --cxxopt='--std=c++14' \
-    --fat_apk_cpu=x86,arm64-v8a,armeabi-v7a \
-    //java/org/mlperf/inference:mlperf_app
-adb install -r bazel-bin/java/org/mlperf/inference/mlperf_app.apk
-```
 """
+
 import cv2
 import sys
 import argparse
@@ -39,14 +22,17 @@ from collections import defaultdict
 from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
+
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # CONSTANTS
 IMAGENET_CLASSES_URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
-COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
+#(TODO: remove)COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
 COCO_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
-ADE20K_URL =  'https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip' ## For development, can use this link, otherwise it'll download the entire dataset (3GB)
+## For development, can use the 1st link, otherwise it'll download the entire dataset (3GB)
+ADE20K_URL =  "https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip"
 #ADE20K_URL = "https://groups.csail.mit.edu/vision/datasets/ADE20K/ADE20K_2016_07_26.zip"
 
 
@@ -66,6 +52,8 @@ class InputDataset:
             if True, answers yes to all questions asked by the script (such as permission to remove folders)
         type: str ("imagenet" or "coco")
             type of the dataset one wants to mimic
+        new_img_size: (int, int)
+            if images need rescaling, new_img_size is the new shape of the image
         mobile_app_path: str
             path to the folder containing the mobile_app repo
         tmp_path: str
@@ -88,7 +76,8 @@ class InputDataset:
 
         self.mobile_app_path = mobile_app_path
         self.tmp_path = os.path.join(self.mobile_app_path, "tmp_dataset_script") # temporary folder
-        self.check_tmp_path()
+        self.out_img_path = os.path.join(self.tmp_path, "img")
+        self.check_create_tmp_path()
 
         self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", self.type+"_val")
         if self.type == "imagenet":
@@ -96,19 +85,17 @@ class InputDataset:
         elif self.type == "coco":
             self.out_ann_path = self.out_ann_path + ".pbtxt"
 
-        self.out_img_path = os.path.join(self.tmp_path, "img")
-        logger.info(f"Creating {self.out_img_path} directory")
-        os.makedirs(self.out_img_path)
-
         self.input_data_path = input_data_path
         if self.input_data_path is None:
             self.download_dataset()
+
         self.load_classes()
 
-    def check_tmp_path(self):
+    def check_create_tmp_path(self):
         """
-        Checks whether the given tmp_path already exists or not. If so, asks the user to either remove it
-        or change the path.
+        Checks if self.tmp_path exists.
+        If so, asks the user to either remove it. If user does not remove it, quit.
+        If not, create self.tmp_path and self.out_img_path folders.
         """
         while os.path.isdir(self.tmp_path):
             if not self.yes_all:
@@ -127,6 +114,8 @@ class InputDataset:
                 sys.exit()
             else:
                 logger.error("Please enter a valid answer (y or n).")
+        logger.info(f"Creating {self.out_img_path} directory")
+        os.makedirs(self.out_img_path)
 
     def load_classes(self):
         """
@@ -155,35 +144,19 @@ class InputDataset:
             self.COCO_CLASSES_reverse = dict(zip(ids, labels))
             self.COCO_CLASSES = dict(zip(labels, ids))
             logger.debug(self.COCO_CLASSES)
+
     def download_dataset(self):
         """
         Downloads dataset from a url to the temp folder self.tmp_path and updates self.input_data_path accordingly.
         """
-        raise ValueError("input_data_path must not be None")
+        raise ValueError("input_data_path must not be None, or download_dtaset should be implemented")
 
-    def process_single_img(self, img_path, new_img_path):
-        """
-        Processes a single image.
-        For imagenet, it just copies the image to the new_img_path.
-        For coco, it rescale to self.new_img_size shape, and save to the new_img_path.
-        """
-        if self.type == "imagenet":
-            logger.debug(f"Copying {img_path} to \n {new_img_path}")
-            shutil.copyfile(img_path,
-                            new_img_path)
-        elif self.type == "coco":
-            logger.debug(f"Rescaling {img_path} to shape {self.new_img_size} and save to \n {new_img_path}")
-            img = cv2.imread(img_path)
-            resized_img = cv2.resize(img, self.new_img_size, interpolation=cv2.INTER_LINEAR)
-            cv2.imwrite(new_img_path, resized_img)
 
-    def process_dataset(self,
-                       selected_img_path
-                       ):
+    def process_dataset(self, selected_img_path):
         """
         Processes the input dataset to mimic the format of self.type.
         Tasks performed:
-        - Copies, renames images from selected_img_path to temporary folder self.out_img_path.
+        - Process each single image by calling self.process_single_img.
         For imagenet, the new images should follow the ILSVRC2012 validation set format: images should be in JPEG,
         and named ILSVRC2012_val_{idx:08}.JPEG where idx starts at 1.
         - Pushes images to the mobile phone sdcard/mlperf_datasets/{self.type}/img folder.
@@ -197,8 +170,8 @@ class InputDataset:
             selected_img_path: list[str]
                 list of paths to images that we want to put in the new dataset
         """
-
-        with open(self.out_ann_path,'w') as new_ann_file:
+        #### Process each image + write annotations in mobile_app txt file ####
+        with open(self.out_ann_path,'w') as ann_file:
             for i, img_path in enumerate(selected_img_path):
                 if self.type == "imagenet":
                     new_img_name = f"ILSVRC2012_val_{i+1:08}.JPEG"
@@ -207,15 +180,12 @@ class InputDataset:
 
                 self.process_single_img(img_path=img_path,
                                         new_img_path=os.path.join(self.out_img_path, new_img_name))
-
-                self.write_annotation(new_ann_file=new_ann_file, img_path=img_path, new_img_name=new_img_name)
-
+                self.write_annotation(ann_file=ann_file, img_path=img_path, new_img_name=new_img_name)
 
 
-        #### Push to mobile ####
+
+        #### Removes existing self.type/img folder from the phone ####
         mobile_dataset_path = os.path.join(os.sep,'sdcard','mlperf_datasets', self.type)
-
-        # Removes existing imagenet folder from the phone
         phone_dataset = subprocess.run(["adb", "shell", "ls", mobile_dataset_path], stderr=subprocess.DEVNULL)
         if phone_dataset.returncode == 0:
             print(f"{mobile_dataset_path} exists. Its elements will be deleted.")
@@ -237,6 +207,7 @@ class InputDataset:
                 else:
                     logger.error("Please enter a valid answer (y or n).")
 
+        #### Push to mobile ####
         logger.info(f"Creating {os.path.join(mobile_dataset_path,'img')} directory on the phone.")
         try:
             subprocess.run(["adb", "shell", "mkdir", "-p", os.path.join(mobile_dataset_path,"img")], check=True,
@@ -250,7 +221,7 @@ class InputDataset:
         except subprocess.CalledProcessError as e:
             raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-
+        #### Remove temporary folder ####
         if not self.yes_all:
             remove_tmp_folder = input(f"Do you want to remove the temporary folder located at {self.tmp_path} which has been created by the script? [y/n] \n")
         if self.yes_all or remove_tmp_folder == 'y':
@@ -258,12 +229,37 @@ class InputDataset:
             logger.info(f"{self.tmp_path} folder has been removed.")
 
 
-            #TODO: remove find_label
-    def find_label(self, img_path):
+    def process_single_img(self, img_path, new_img_path):
         """
-        Given an image path, returns the ground-truth class.
-        Returns:
-            label: index of corresponding class in type dataset
+        Processes a single image.
+        If self.new_img_size is specified, rescales the image.
+        Otherwise, just copies to the new path.
+        Args:
+            img_path: str
+                path to the image to process
+            new_img_path: str
+                output path to the new image
+        """
+        if self.new_img_size is None:
+            logger.debug(f"Copying {img_path} to \n {new_img_path}")
+            shutil.copyfile(img_path,
+                            new_img_path)
+        else:
+            logger.debug(f"Rescaling {img_path} to shape {self.new_img_size} and save to \n {new_img_path}")
+            img = cv2.imread(img_path)
+            resized_img = cv2.resize(img, self.new_img_size, interpolation=cv2.INTER_LINEAR)
+            cv2.imwrite(new_img_path, resized_img)
+
+    def write_annotation(self, ann_file, img_path, new_img_name):
+        """
+        Write annotation of a given image, into the ann_file.
+        Args:
+            ann_file: io.TextIOWrapper
+                annotation file where the final annotations are written
+            img_path: str
+                path to the image
+            new_img_name: str
+                name of the new image
         """
         raise NotImplementedError
 
@@ -274,7 +270,6 @@ class InputDataset:
             selected_img_path: list of paths to images that we want to put in the output dataset
         """
         raise NotImplementedError
-
 
 
 
@@ -289,6 +284,9 @@ class ADE20KDataset(InputDataset):
         self.in_annotations = {}
 
     def load_classes(self):
+        """
+        Load ADE20K classes in addition to self.type classes.
+        """
         super().load_classes()
         from scipy.io import loadmat
         mat_path = os.path.join(self.input_data_path, "index_ade20k.mat")
@@ -304,7 +302,14 @@ class ADE20KDataset(InputDataset):
 
     def is_in_imagenet(self, ade_class):
         """
-        Checks if ade_class belongs to imagenet. If so, returns the corresponding imagenet class index.
+        Checks if ade_class belongs to imagenet.
+        If so, returns the corresponding imagenet class index.
+        Args:
+            ade_class: str
+                ADE20K class label (name of the parent folder to the image in ADE20K dataset)
+        Returns:
+            None if the class does not intersect with imagenet classes
+            (int) imagenet label index otherwise
         """
         spaced_class = " ".join(ade_class.split("_"))
         for imagenet_class in self.IMAGENET_CLASSES:
@@ -315,11 +320,17 @@ class ADE20KDataset(InputDataset):
 
     def is_in_coco(self, ade_class_idx):
         """
-        Checks if ade_class belongs to coco. If so, returns the corresponding coco class index.
+        Checks if class corresponding to ade_class_idx belongs to coco.
+        If so, returns the corresponding coco_val class index.
+        Args:
+            ade_class: int
+                ADE20K class label index
+        Returns:
+            None if the class does not intersect with coco classes
+            (int) coco label index otherwise
         """
         if ade_class_idx == 0:
             return None
-
         for single_label in self.ADE20K_CLASSES_reverse[ade_class_idx].split(", "):
             if single_label in self.COCO_CLASSES.keys():
                 return self.COCO_CLASSES[single_label]
@@ -327,6 +338,9 @@ class ADE20KDataset(InputDataset):
 
 
     def download_dataset(self):
+        """
+        Downloads ADE20K to temporary folder.
+        """
         dataset_name = ADE20K_URL.split("/")[-1].split(".")[0]
         req = urllib.request.Request(ADE20K_URL, method="HEAD")
         size_file = urllib.request.urlopen(req).headers["Content-Length"]
@@ -353,19 +367,22 @@ class ADE20KDataset(InputDataset):
         """
         Subsamples from ADE20K: it considers all images which class intersects with imagenet classes.
         Args:
-            N: number of wanted samples.
-            policy: type of policy: "random", "balanced".
-                    "random": subsamples N images from the images class intersects with imagenet classes.
-                    "balanced": subsamples N images from the images class intersects with imagenet classes, while keeping
-                                the frequencies of each class.
+            N: int
+                number of wanted samples.
+            policy: ["random", "balanced"]
+                type of policy can be:
+                "random": randomly subsamples N images from images which class intersects with self.type classes.
+                "balanced": (imagenet only) subsamples N images from images which class intersects with imagenet classes,
+                            while keeping the frequencies of each class.
 
         Returns:
             selected_img_path: list of path to images we want to keep in the new dataset
         """
-
         intersecting_img = []
         logger.info(f"Subsampling ADE20K with a {policy} policy...")
         img_in_class = defaultdict(list)
+
+        #### Fetch all images which class intersect with self.type classes ####
         for set_path in [self.train_path, self.val_path]:
             for letter in os.listdir(set_path):
                 logger.debug(f"Folder with letter {letter}")
@@ -416,6 +433,7 @@ class ADE20KDataset(InputDataset):
                                                                                                                max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
                                 intersecting_img.append(img_path)
 
+        #### Subsampling from images which intersect ####
         logger.info(f"Number of intersecting images : {len(intersecting_img)}")
         if N >= len(intersecting_img):
             logger.info("Number of intersecting images < N(Number of images we want to keep): keeping all intersecting images.")
@@ -441,29 +459,37 @@ class ADE20KDataset(InputDataset):
                 raise NotImplementedError
         return selected_img_path
 
-    def write_annotation(self, new_ann_file, img_path, new_img_name):
+    def write_annotation(self, ann_file, img_path, new_img_name):
         """
-        Write annotations for img_path
-        à mettre dans ade20k class"""
+        Write annotation of a given image, into the ann_file.
+        Args:
+            ann_file: io.TextIOWrapper
+                annotation file where the final annotations are written
+            img_path: str
+                path to the image
+            new_img_name: str
+                name of the new image
+        """
         if self.type == "imagenet":
             label = self.in_annotations[img_path]
             logger.debug(f"Img {img_path}, imagenet label {label}")
-            new_ann_file.write(str(label) + "\n")
+            ann_file.write(str(label) + "\n")
         elif self.type == "coco":
-            new_ann_file.write("detection_results {\n")
+            ann_file.write("detection_results {\n")
             for obj in self.in_annotations[img_path].keys():
-                new_ann_file.write("  objects {\n")
-                new_ann_file.write(f"    class_id: {self.in_annotations[img_path][obj]['label']}\n")
-                new_ann_file.write("    bounding_box {\n")
-                new_ann_file.write(f"      normalized_top: {self.in_annotations[img_path][obj]['normalized_bbox'][0]}\n")
-                new_ann_file.write(f"      normalized_bottom: {self.in_annotations[img_path][obj]['normalized_bbox'][1]}\n")
-                new_ann_file.write(f"      normalized_left: {self.in_annotations[img_path][obj]['normalized_bbox'][2]}\n")
-                new_ann_file.write(f"      normalized_right: {self.in_annotations[img_path][obj]['normalized_bbox'][3]}\n")
-                new_ann_file.write("    }\n")
-                new_ann_file.write("  }\n")
-            new_ann_file.write(f'  image_name: "{new_img_name}"\n')
-            new_ann_file.write(f'  image_id: {int(new_img_name.split(".")[0])}\n')
-            new_ann_file.write("}\n")
+                ann_file.write("  objects {\n")
+                ann_file.write(f"    class_id: {self.in_annotations[img_path][obj]['label']}\n")
+                ann_file.write("    bounding_box {\n")
+                ann_file.write(f"      normalized_top: {self.in_annotations[img_path][obj]['normalized_bbox'][0]}\n")
+                ann_file.write(f"      normalized_bottom: {self.in_annotations[img_path][obj]['normalized_bbox'][1]}\n")
+                ann_file.write(f"      normalized_left: {self.in_annotations[img_path][obj]['normalized_bbox'][2]}\n")
+                ann_file.write(f"      normalized_right: {self.in_annotations[img_path][obj]['normalized_bbox'][3]}\n")
+                ann_file.write("    }\n")
+                ann_file.write("  }\n")
+            ann_file.write(f'  image_name: "{new_img_name}"\n')
+            ann_file.write(f'  image_id: {int(new_img_name.split(".")[0])}\n')
+            ann_file.write("}\n")
+
 
 class KanterDataset(InputDataset):
     def __init__(self, input_data_path, mobile_app_path, type,yes_all):
