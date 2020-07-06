@@ -414,6 +414,7 @@ class ADE20KDataset(InputDataset):
                                     label_correspondance[ade_idx] = coco_label
                             if label_correspondance:
                                 logger.debug(f"{img_path}, label correspondance {label_correspondance}")
+                                intersecting_img.append(img_path)
                                 self.in_annotations[img_path] = {}
                                 # scaling factors
                                 sr = 1/n_row
@@ -431,7 +432,7 @@ class ADE20KDataset(InputDataset):
                                                                                                                max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r*sr),
                                                                                                                min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c*sc),
                                                                                                                max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
-                                intersecting_img.append(img_path)
+                                            # TODO: parallelization?
 
         #### Subsampling from images which intersect ####
         logger.info(f"Number of intersecting images : {len(intersecting_img)}")
@@ -527,6 +528,7 @@ class KanterDataset(InputDataset):
 
 
 def main():
+    # TODO: put in config file ?
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_data_path", type=str, help="directory of input dataset (img + annotations). If None, download script", default=None)
     parser.add_argument("--mobile_app_path", type=str, help="path to root directory containing the mobile app repo")
@@ -540,6 +542,7 @@ def main():
     adb_devices = subprocess.run(["adb", "devices"], stdout=subprocess.PIPE, universal_newlines=True, check=True)
     assert len(adb_devices.stdout.split('\n')) > 3, "No device attached. Please connect your phone."
     logger.info(adb_devices.stdout)
+    # TODO : check writing permission + allow only 1 device
 
     input_data_path = args.input_data_path
     if args.dataset == "kanter":
