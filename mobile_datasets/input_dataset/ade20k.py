@@ -14,7 +14,7 @@ from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
 
-from input_dataset import InputDataset
+from .input_dataset import InputDataset
 
 class ADE20KDataset(InputDataset):
     def __init__(self, input_data_path, mobile_app_path, type, yes_all):
@@ -79,6 +79,22 @@ class ADE20KDataset(InputDataset):
                 return self.COCO_CLASSES[single_label]
         return None
 
+        #TODO: virer is_in_coco
+    def intersecting_classes():
+        #TODO: intégrer proprement
+        self.intersecting_ade_class = set()
+        self.intersecting_coco = set()
+        self.intersecting_ade_idx = set()
+        self.mapping_ade_coco = {}
+        for ade_class in self.ADE20K_CLASSES.keys():
+            for ade_single_class in ade_class.split(", "):
+                for coco_class in self.COCO_CLASSES.keys():
+                    for coco_single_class in coco_class.split(", "):
+                        if ade_single_class == coco_single_class:
+                            self.intersecting_ade_class.add(ade_class)
+                            self.intersecting_ade_idx.add(ADE20K_CLASSES[ade_class])
+                            self.intersecting_coco.add(coco_class)
+                            self.mapping_ade_coco[ADE20K_CLASSES[ade_class]] = coco_class # maps idx ade 20K to coco_class
 
     def download_dataset(self):
         """
@@ -126,55 +142,59 @@ class ADE20KDataset(InputDataset):
         img_in_class = defaultdict(list)
 
         #### Fetch all images which class intersect with self.type classes ####
-        for set_path in [self.train_path, self.val_path]:
-            for letter in os.listdir(set_path):
-                logger.debug(f"Folder with letter {letter}")
-                letter_path = os.path.join(set_path, letter)
-                for cur_class in os.listdir(letter_path):
-                    class_path = os.path.join(letter_path, cur_class)
+        if self.type == "imagenet": # TODO: utiliser os walk comme coco
+            for set_path in [self.train_path, self.val_path]:
+                for letter in os.listdir(set_path):
+                    logger.debug(f"Folder with letter {letter}")
+                    letter_path = os.path.join(set_path, letter)
+                    for cur_class in os.listdir(letter_path):
+                        class_path = os.path.join(letter_path, cur_class)
 
-                    if self.type == "imagenet":
-                        imagenet_label = self.is_in_imagenet(ade_class=cur_class)
-                        if imagenet_label is not None:
-                            for file in [f for f in os.listdir(class_path) if f.endswith(".jpg")]:
-                                img_path = os.path.join(class_path, file)
-                                intersecting_img.append(img_path)
-                                self.in_annotations[img_path] = imagenet_label
-                                img_in_class[imagenet_label].append(img_path)
+                        if self.type == "imagenet":
+                            imagenet_label = self.is_in_imagenet(ade_class=cur_class)
+                            if imagenet_label is not None:
+                                for file in [f for f in os.listdir(class_path) if f.endswith(".jpg")]:
+                                    img_path = os.path.join(class_path, file)
+                                    intersecting_img.append(img_path)
+                                    self.in_annotations[img_path] = imagenet_label
+                                    img_in_class[imagenet_label].append(img_path)
+        elif self.type == "coco": #TODO: recoder propre
+            for root, dirs, files in os.walk(self.input_data_path):
+                for seg_file in files:
+                    if seg_file.endswith("_seg.png"):
+                    #for seg_file in [f for f in os.listdir(class_path) if f.endswith('_seg.png')]:
+                        img_path = os.path.join(root, seg_file[:-8] + ".jpg")
+                        seg_img = plt.imread(os.path.join(root, seg_file))
 
-                    elif self.type == "coco":
-                        for seg_file in [f for f in os.listdir(class_path) if f.endswith('_seg.png')]:
-                            img_path = os.path.join(class_path, seg_file[:-8] + ".jpg")
-                            seg_img = plt.imread(os.path.join(class_path, seg_file))
-
-                            n_row, n_col = seg_img.shape[0], seg_img.shape[1]
-                            instance_seg_img = (seg_img[:,:,2]*255).astype("int")
-                            class_seg_img = (seg_img[:,:,0]*255/10*256 + seg_img[:,:,1]*255).astype("int")
-                            label_correspondance = {}
-                            for ade_idx in np.unique(class_seg_img):
-                                coco_label = self.is_in_coco(ade_idx)
-                                if coco_label is not None:
-                                    label_correspondance[ade_idx] = coco_label
-                            if label_correspondance:
-                                logger.debug(f"{img_path}, label correspondance {label_correspondance}")
-                                self.in_annotations[img_path] = {}
-                                # scaling factors
-                                sr = 1/n_row
-                                sc = 1/n_col
-                                for r in range(n_row):
-                                    for c in range(n_col):
-                                        if class_seg_img[r,c] in label_correspondance:
-                                            object_id = instance_seg_img[r,c]
-                                            if object_id not in self.in_annotations[img_path]:
-                                                self.in_annotations[img_path][object_id] = {}
-                                                self.in_annotations[img_path][object_id]["label"] = label_correspondance[class_seg_img[r,c]]
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [r*sr, r*sr, c*sc, c*sc]
-                                            else:
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r*sr),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r*sr),
-                                                                                                               min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c*sc),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
-                                intersecting_img.append(img_path)
+                        n_row, n_col = seg_img.shape[0], seg_img.shape[1]
+                        instance_seg_img = (seg_img[:,:,2]*255).astype("int")
+                        class_seg_img = (seg_img[:,:,0]*255/10*256 + seg_img[:,:,1]*255).astype("int")
+                        label_correspondance = {}
+                        for ade_idx in np.unique(class_seg_img):
+                            coco_label = self.is_in_coco(ade_idx)
+                            if coco_label is not None:
+                                label_correspondance[ade_idx] = coco_label
+                        if label_correspondance:
+                            logger.debug(f"{img_path}, label correspondance {label_correspondance}")
+                            intersecting_img.append(img_path)
+                            self.in_annotations[img_path] = {}
+                            # scaling factors
+                            sr = 1/n_row
+                            sc = 1/n_col
+                            for r in range(n_row):
+                                for c in range(n_col):
+                                    if class_seg_img[r,c] in label_correspondance:
+                                        object_id = instance_seg_img[r,c]
+                                        if object_id not in self.in_annotations[img_path]:
+                                            self.in_annotations[img_path][object_id] = {}
+                                            self.in_annotations[img_path][object_id]["label"] = label_correspondance[class_seg_img[r,c]]
+                                            self.in_annotations[img_path][object_id]["normalized_bbox"] = [r*sr, r*sr, c*sc, c*sc]
+                                        else:
+                                            self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r*sr),
+                                                                                                           max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r*sr),
+                                                                                                           min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c*sc),
+                                                                                                           max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
+        # TODO: parallelization? / save annotations?
 
         #### Subsampling from images which intersect ####
         logger.info(f"Number of intersecting images : {len(intersecting_img)}")

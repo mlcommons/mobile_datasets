@@ -1,3 +1,32 @@
+import cv2
+import sys
+import argparse
+import os
+import random
+import shutil
+import urllib
+import zipfile
+import requests
+import subprocess
+import logging
+from collections import defaultdict
+from math import ceil
+import matplotlib.pyplot as plt
+import numpy as np
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
+# CONSTANTS
+IMAGENET_CLASSES_URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
+COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
+COCO_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+## For development, can use the 1st link, otherwise it'll download the entire dataset (3GB)
+ADE20K_URL =  "https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip"
+#ADE20K_URL = "https://groups.csail.mit.edu/vision/datasets/ADE20K/ADE20K_2016_07_26.zip"
+
+
 class InputDataset:
     """
     Class which represents the input dataset (e.g. ADE20K) that one wants to subsample from and reformat
@@ -50,7 +79,16 @@ class InputDataset:
         if self.input_data_path is None:
             self.download_dataset()
 
+
+
+        # Parameters to mimic number of bbox of coco
+        self.percentile = 10
+        self.max_nbox_coco = 20
+        self.min_nbox_coco = 1
         self.load_classes()
+
+
+
 
     def check_create_tmp_path(self):
         """
@@ -99,12 +137,30 @@ class InputDataset:
                 z.extractall(f"{self.tmp_path}")
             annot_json_path =  os.path.join(self.tmp_path,
                                             "annotations", "instances_val2017.json")
-            categories = json.load(open(annot_json_path, 'r'))['categories']
+            annot_json = json.load(open(annot_json_path, 'r'))
+            categories = annot_json['categories']
             ids = list(map(lambda d: d['id'], categories))
             labels = list(map(lambda d: d['name'], categories))
             self.COCO_CLASSES_reverse = dict(zip(ids, labels))
             self.COCO_CLASSES = dict(zip(labels, ids))
             logger.debug(self.COCO_CLASSES)
+
+            self.compute_n_box_per_img_coco(annot_json) # useful to match distribution of nb of bbox per img
+
+
+    def compute_n_box_per_img_coco(self,coco_ann_dict):
+        """
+        n_box_per_img_coco : list of number of bbox per img in coco dataset
+        """
+        n_box_in_img_coco = defaultdict(int)
+        for annot in coco_ann_dict["annotations"]:
+            n_box_in_img_coco[annot["image_id"]] += 1
+        self.n_box_per_img_coco = np.array(list(n_box_in_img_coco.values()))
+        percentiles = [self.percentile*i for i in range(1, int(100/self.percentile))] # TODO: can be modified??should it be chosen by user?
+        nbox_percentile = [np.percentile(self.n_box_per_img_coco, p) for p in percentiles]
+        self.coco_percentile_groups = [[self.min_nbox_coco, nbox_percentile[0]]] + [[nbox_percentile[i], \
+                                    nbox_percentile[i+1]] for i in range(0,len(nbox_percentile)-1)] + [[nbox_percentile[-1], self.max_nbox_coco+1]]
+        logger.debug(f"percentile {self.percentile}, coco per grp {self.coco_percentile_groups}")
 
     def download_dataset(self):
         """
@@ -206,7 +262,7 @@ class InputDataset:
             shutil.copyfile(img_path,
                             new_img_path)
         else:
-            logger.debug(f"Rescaling {img_path} to shape {self.new_img_size} and save to \n {new_img_path}")
+            #logger.debug(f"Rescaling {img_path} to shape {self.new_img_size} and save to \n {new_img_path}")
             img = cv2.imread(img_path)
             resized_img = cv2.resize(img, self.new_img_size, interpolation=cv2.INTER_LINEAR)
             cv2.imwrite(new_img_path, resized_img)

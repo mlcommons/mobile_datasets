@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 # CONSTANTS
 IMAGENET_CLASSES_URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
-#(TODO: remove)COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
+COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
 COCO_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 ## For development, can use the 1st link, otherwise it'll download the entire dataset (3GB)
 ADE20K_URL =  "https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip"
@@ -336,6 +336,22 @@ class ADE20KDataset(InputDataset):
                 return self.COCO_CLASSES[single_label]
         return None
 
+        #TODO: virer is_in_coco
+    def intersecting_classes():
+        #TODO: intégrer proprement
+        self.intersecting_ade_class = set()
+        self.intersecting_coco = set()
+        self.intersecting_ade_idx = set()
+        self.mapping_ade_coco = {}
+        for ade_class in self.ADE20K_CLASSES.keys():
+            for ade_single_class in ade_class.split(", "):
+                for coco_class in self.COCO_CLASSES.keys():
+                    for coco_single_class in coco_class.split(", "):
+                        if ade_single_class == coco_single_class:
+                            self.intersecting_ade_class.add(ade_class)
+                            self.intersecting_ade_idx.add(ADE20K_CLASSES[ade_class])
+                            self.intersecting_coco.add(coco_class)
+                            self.mapping_ade_coco[ADE20K_CLASSES[ade_class]] = coco_class # maps idx ade 20K to coco_class
 
     def download_dataset(self):
         """
@@ -383,56 +399,59 @@ class ADE20KDataset(InputDataset):
         img_in_class = defaultdict(list)
 
         #### Fetch all images which class intersect with self.type classes ####
-        for set_path in [self.train_path, self.val_path]:
-            for letter in os.listdir(set_path):
-                logger.debug(f"Folder with letter {letter}")
-                letter_path = os.path.join(set_path, letter)
-                for cur_class in os.listdir(letter_path):
-                    class_path = os.path.join(letter_path, cur_class)
+        if self.type == "imagenet": # TODO: utiliser os walk comme coco
+            for set_path in [self.train_path, self.val_path]:
+                for letter in os.listdir(set_path):
+                    logger.debug(f"Folder with letter {letter}")
+                    letter_path = os.path.join(set_path, letter)
+                    for cur_class in os.listdir(letter_path):
+                        class_path = os.path.join(letter_path, cur_class)
 
-                    if self.type == "imagenet":
-                        imagenet_label = self.is_in_imagenet(ade_class=cur_class)
-                        if imagenet_label is not None:
-                            for file in [f for f in os.listdir(class_path) if f.endswith(".jpg")]:
-                                img_path = os.path.join(class_path, file)
-                                intersecting_img.append(img_path)
-                                self.in_annotations[img_path] = imagenet_label
-                                img_in_class[imagenet_label].append(img_path)
+                        if self.type == "imagenet":
+                            imagenet_label = self.is_in_imagenet(ade_class=cur_class)
+                            if imagenet_label is not None:
+                                for file in [f for f in os.listdir(class_path) if f.endswith(".jpg")]:
+                                    img_path = os.path.join(class_path, file)
+                                    intersecting_img.append(img_path)
+                                    self.in_annotations[img_path] = imagenet_label
+                                    img_in_class[imagenet_label].append(img_path)
+        elif self.type == "coco": #TODO: recoder propre
+            for root, dirs, files in os.walk(self.input_data_path):
+                for seg_file in files:
+                    if seg_file.endswith("_seg.png"):
+                    #for seg_file in [f for f in os.listdir(class_path) if f.endswith('_seg.png')]:
+                        img_path = os.path.join(root, seg_file[:-8] + ".jpg")
+                        seg_img = plt.imread(os.path.join(root, seg_file))
 
-                    elif self.type == "coco":
-                        for seg_file in [f for f in os.listdir(class_path) if f.endswith('_seg.png')]:
-                            img_path = os.path.join(class_path, seg_file[:-8] + ".jpg")
-                            seg_img = plt.imread(os.path.join(class_path, seg_file))
-
-                            n_row, n_col = seg_img.shape[0], seg_img.shape[1]
-                            instance_seg_img = (seg_img[:,:,2]*255).astype("int")
-                            class_seg_img = (seg_img[:,:,0]*255/10*256 + seg_img[:,:,1]*255).astype("int")
-                            label_correspondance = {}
-                            for ade_idx in np.unique(class_seg_img):
-                                coco_label = self.is_in_coco(ade_idx)
-                                if coco_label is not None:
-                                    label_correspondance[ade_idx] = coco_label
-                            if label_correspondance:
-                                logger.debug(f"{img_path}, label correspondance {label_correspondance}")
-                                intersecting_img.append(img_path)
-                                self.in_annotations[img_path] = {}
-                                # scaling factors
-                                sr = 1/n_row
-                                sc = 1/n_col
-                                for r in range(n_row):
-                                    for c in range(n_col):
-                                        if class_seg_img[r,c] in label_correspondance:
-                                            object_id = instance_seg_img[r,c]
-                                            if object_id not in self.in_annotations[img_path]:
-                                                self.in_annotations[img_path][object_id] = {}
-                                                self.in_annotations[img_path][object_id]["label"] = label_correspondance[class_seg_img[r,c]]
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [r*sr, r*sr, c*sc, c*sc]
-                                            else:
-                                                self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r*sr),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r*sr),
-                                                                                                               min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c*sc),
-                                                                                                               max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
-                                            # TODO: parallelization?
+                        n_row, n_col = seg_img.shape[0], seg_img.shape[1]
+                        instance_seg_img = (seg_img[:,:,2]*255).astype("int")
+                        class_seg_img = (seg_img[:,:,0]*255/10*256 + seg_img[:,:,1]*255).astype("int")
+                        label_correspondance = {}
+                        for ade_idx in np.unique(class_seg_img):
+                            coco_label = self.is_in_coco(ade_idx)
+                            if coco_label is not None:
+                                label_correspondance[ade_idx] = coco_label
+                        if label_correspondance:
+                            logger.debug(f"{img_path}, label correspondance {label_correspondance}")
+                            intersecting_img.append(img_path)
+                            self.in_annotations[img_path] = {}
+                            # scaling factors
+                            sr = 1/n_row
+                            sc = 1/n_col
+                            for r in range(n_row):
+                                for c in range(n_col):
+                                    if class_seg_img[r,c] in label_correspondance:
+                                        object_id = instance_seg_img[r,c]
+                                        if object_id not in self.in_annotations[img_path]:
+                                            self.in_annotations[img_path][object_id] = {}
+                                            self.in_annotations[img_path][object_id]["label"] = label_correspondance[class_seg_img[r,c]]
+                                            self.in_annotations[img_path][object_id]["normalized_bbox"] = [r*sr, r*sr, c*sc, c*sc]
+                                        else:
+                                            self.in_annotations[img_path][object_id]["normalized_bbox"] = [min(self.in_annotations[img_path][object_id]["normalized_bbox"][0], r*sr),
+                                                                                                           max(self.in_annotations[img_path][object_id]["normalized_bbox"][1], r*sr),
+                                                                                                           min(self.in_annotations[img_path][object_id]["normalized_bbox"][2], c*sc),
+                                                                                                           max(self.in_annotations[img_path][object_id]["normalized_bbox"][3], c*sc)]
+        # TODO: parallelization? / save annotations?
 
         #### Subsampling from images which intersect ####
         logger.info(f"Number of intersecting images : {len(intersecting_img)}")
@@ -492,6 +511,164 @@ class ADE20KDataset(InputDataset):
             ann_file.write("}\n")
 
 
+
+
+
+class GoogleDataset(InputDataset):
+    def __init__(self, input_data_path, mobile_app_path, type, yes_all):
+        super().__init__(input_data_path=input_data_path,
+                          mobile_app_path=mobile_app_path,
+                          type=type,
+                          yes_all=yes_all)
+
+        self.in_annotations = {}
+        self.intersecting_g_class, self.intersecting_coco, self.intersecting_g_idx, self.mapping_g_coco = self.intersecting_classes(DATASET_CLASSES=self.GOOGLE_CLASSES,
+                                                                                                 )
+
+    def load_classes(self):
+        """
+        Load ADE20K classes in addition to self.type classes.
+        """
+        super().load_classes()
+        self.GOOGLE_CLASSES = {}
+        self.GOOGLE_CLASSES_reverse = {}
+        import csv
+        classes_file_path = os.path.join(self.input_data_path, "class-descriptions-boxable.csv")
+        with open(classes_file_path, 'r') as csvfile:
+            spamreader = csv.reader(csvfile)#, delimiter=' ', quotechar='|')
+            for i,row in enumerate(spamreader):
+                self.GOOGLE_CLASSES[row[1].lower()] = row[0]
+                self.GOOGLE_CLASSES_reverse[row[0]] = row[1].lower()
+
+
+    def intersecting_classes(self, DATASET_CLASSES):
+        intersecting_data_class= set()
+        intersecting_coco = set()
+        intersecting_data_idx = set()
+        mapping_data_coco = {}
+        for data_class in DATASET_CLASSES.keys():
+            for data_single_class in data_class.split(", "):
+                for coco_class in self.COCO_CLASSES.keys():
+                    for coco_single_class in coco_class.split(", "):
+                        if data_single_class.lower() == coco_single_class:
+                            intersecting_data_class.add(data_class)
+                            intersecting_data_idx.add(DATASET_CLASSES[data_class])
+                            intersecting_coco.add(coco_class)
+                            mapping_data_coco[DATASET_CLASSES[data_class]] = coco_class
+        return intersecting_data_class, intersecting_coco, intersecting_data_idx, mapping_data_coco
+
+
+
+    def subsample(self, N, policy="random"):
+        """
+        Subsamples from ADE20K: it considers all images which class intersects with imagenet classes.
+        Args:
+            N: int
+                number of wanted samples.
+            policy: ["random", "balanced"]
+                type of policy can be:
+                "random": randomly subsamples N images from images which class intersects with self.type classes.
+                "balanced": (imagenet only) subsamples N images from images which class intersects with imagenet classes,
+                            while keeping the frequencies of each class.
+
+        Returns:
+            selected_img_path: list of path to images we want to keep in the new dataset
+        """
+        intersecting_img = []
+        logger.info(f"Subsampling google with a {policy} policy...")
+        img_in_class = defaultdict(list)
+
+        import json
+        json_annot = json.load(open(os.path.join(self.input_data_path, "annot.json"),'r'))
+
+
+        #### Fetch all images which class intersect with self.type classes ####
+        if self.type == "coco": #TODO: recoder propre
+            for root, dirs, files in os.walk(self.input_data_path):
+                for img_name in files:
+                    if img_name.endswith(".jpg"):
+                        img_path = os.path.join(root, img_name)
+                        intersecting_img.append(img_path)
+                        ann_img = json_annot[img_name]
+                        self.in_annotations[img_path] = {}
+                        for obj in ann_img.keys():
+                            if obj.startswith('obj_id'):
+                                label_name = ann_img[obj]['label_name']
+                                if label_name in self.mapping_g_coco:
+                                    self.in_annotations[img_path][obj] = {}
+                                    coco_idx = self.COCO_CLASSES[self.mapping_g_coco[label_name]]
+                                    self.in_annotations[img_path][obj]["label"] = coco_idx
+                                    #[top bo left right]
+                                    self.in_annotations[img_path][obj]["normalized_bbox"] = ann_img[obj]["nbbox"]
+
+
+        #### Subsampling from images which intersect ####
+        logger.info(f"Number of intersecting images : {len(intersecting_img)}")
+        if N >= len(intersecting_img):
+            logger.info("Number of intersecting images < N(Number of images we want to keep): keeping all intersecting images.")
+            return intersecting_img
+
+        if policy == "random":
+            selected_img_path = random.sample(intersecting_img, N)
+
+        elif policy == "balanced":
+            if self.type == "imagenet":
+                nb_total_img = len(intersecting_img)
+                selected_img_path = []
+                print(f"Number of total images {nb_total_img}")
+                for cur_class in img_in_class.keys():
+                    nb_img_in_class = len(img_in_class[cur_class])
+                    new_nb_img_in_class = min(nb_img_in_class, ceil((nb_img_in_class*N) / nb_total_img))
+                    selected_img_path += random.sample(img_in_class[cur_class], new_nb_img_in_class)
+                    print(f"Class {cur_class}, nb img in class {nb_img_in_class}, new nb img {new_nb_img_in_class}")
+                    print(f"Frequency = {nb_img_in_class/nb_total_img}")
+
+                selected_img_path = random.sample(selected_img_path, N)
+            else:
+                raise NotImplementedError
+        return selected_img_path
+
+
+
+    def write_annotation(self, ann_file, img_path, new_img_name):
+        """
+        Write annotation of a given image, into the ann_file.
+        Args:
+            ann_file: io.TextIOWrapper
+                annotation file where the final annotations are written
+            img_path: str
+                path to the image
+            new_img_name: str
+                name of the new image
+        """
+        if self.type == "coco":
+            ann_file.write("detection_results {\n")
+            for obj in self.in_annotations[img_path].keys():
+                ann_file.write("  objects {\n")
+                ann_file.write(f"    class_id: {self.in_annotations[img_path][obj]['label']}\n")
+                ann_file.write("    bounding_box {\n")
+                ann_file.write(f"      normalized_top: {self.in_annotations[img_path][obj]['normalized_bbox'][0]}\n")
+                ann_file.write(f"      normalized_bottom: {self.in_annotations[img_path][obj]['normalized_bbox'][1]}\n")
+                ann_file.write(f"      normalized_left: {self.in_annotations[img_path][obj]['normalized_bbox'][2]}\n")
+                ann_file.write(f"      normalized_right: {self.in_annotations[img_path][obj]['normalized_bbox'][3]}\n")
+                ann_file.write("    }\n")
+                ann_file.write("  }\n")
+            ann_file.write(f'  image_name: "{new_img_name}"\n')
+            ann_file.write(f'  image_id: {int(new_img_name.split(".")[0])}\n')
+            ann_file.write("}\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
 class KanterDataset(InputDataset):
     def __init__(self, input_data_path, mobile_app_path, type,yes_all):
         super().__init__(input_data_path=input_data_path,
@@ -534,7 +711,7 @@ def main():
     parser.add_argument("--mobile_app_path", type=str, help="path to root directory containing the mobile app repo")
     parser.add_argument("--N", type=int, help="number of samples wanted in the dataset")
     parser.add_argument("--type", type=str.lower, help="coco or imagenet", choices=["coco", "imagenet"])
-    parser.add_argument("--dataset", type=str.lower, default="ade20k", help="Kanter or ADE20K or other to implement", choices=["kanter", "ade20k"])
+    parser.add_argument("--dataset", type=str.lower, default="ade20k", help="Kanter or ADE20K or other to implement", choices=["kanter", "ade20k","google"])
     parser.add_argument("-y", action="store_true", help="automatically answer yes to all questions. If on, the script may remove folders without permission.")
     parser.add_argument("--subsampling_strategy", type=str.lower, help="random or balanced", choices=["random", "balanced"], default="random")
     args = parser.parse_args()
@@ -556,7 +733,11 @@ def main():
                                 mobile_app_path=args.mobile_app_path,
                                 type=args.type,
                                 yes_all=args.y)
-
+    elif args.dataset == "google":
+        input_dataset = GoogleDataset(input_data_path=input_data_path,
+                                mobile_app_path=args.mobile_app_path,
+                                type=args.type,
+                                yes_all=args.y)
     selected_img_path = input_dataset.subsample(N=args.N, policy=args.subsampling_strategy)
     input_dataset.process_dataset(selected_img_path=selected_img_path)
 
