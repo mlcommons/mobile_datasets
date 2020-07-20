@@ -82,8 +82,8 @@ class InputDataset:
 
 
         # Parameters to mimic number of bbox of coco
-        self.percentile = 10
-        self.max_nbox_coco = 20
+        self.percentile = 25
+        self.max_nbox_coco = 50
         self.min_nbox_coco = 1
         self.load_classes()
 
@@ -123,7 +123,7 @@ class InputDataset:
         if self.type == "imagenet":
             logger.info("Loading imagenet classes")
             self.IMAGENET_CLASSES =  {v:k for (k,v) in eval(requests.get(IMAGENET_CLASSES_URL).text).items()}
-            logger.debug(self.IMAGENET_CLASSES)
+            logger.debug(f"nb Imagenet classes: {len(self.IMAGENET_CLASSES.keys())}")
         if self.type == "coco":
             # list_coco_classes = (requests.get(COCO_CLASSES_URL).text).split("\n")
             # self.COCO_CLASSES = dict(zip(list_coco_classes, [i+1 for i in range(len(list_coco_classes))]))
@@ -147,20 +147,43 @@ class InputDataset:
 
             self.compute_n_box_per_img_coco(annot_json) # useful to match distribution of nb of bbox per img
 
+    def bbox_area(self, bot, top, right, left):
+        #TODO: move to utils
+        return (bot - top) * (right - left)
 
     def compute_n_box_per_img_coco(self,coco_ann_dict):
         """
         n_box_per_img_coco : list of number of bbox per img in coco dataset
         """
-        n_box_in_img_coco = defaultdict(int)
+        area_img_coco = {}
+        for img_dict in coco_ann_dict["images"]:
+            area_img_coco[img_dict["id"]] = img_dict["width"]*img_dict["height"]
+
+        dict_img_coco = {}
         for annot in coco_ann_dict["annotations"]:
-            n_box_in_img_coco[annot["image_id"]] += 1
-        self.n_box_per_img_coco = np.array(list(n_box_in_img_coco.values()))
+            if annot["image_id"] not in dict_img_coco:
+                dict_img_coco[annot["image_id"]] = [0,0]
+            # norm area, average over bbox in an img
+            norm_area_annot = annot["bbox"][2]*annot["bbox"][3] / area_img_coco[annot["image_id"]]
+            dict_img_coco[annot["image_id"]][1] *= dict_img_coco[annot["image_id"]][0]/(dict_img_coco[annot["image_id"]][0]+1)
+            dict_img_coco[annot["image_id"]][1] += norm_area_annot/(dict_img_coco[annot["image_id"]][0]+1)
+            dict_img_coco[annot["image_id"]][0] += 1 # number of bbox
+
+        sorted_by_nbox = sorted(list(dict_img_coco.values()), key=lambda el:el[0])
+        n_box_per_img_coco = np.array(list(map(lambda x: x[0], sorted_by_nbox)))
         percentiles = [self.percentile*i for i in range(1, int(100/self.percentile))] # TODO: can be modified??should it be chosen by user?
-        nbox_percentile = [np.percentile(self.n_box_per_img_coco, p) for p in percentiles]
-        self.coco_percentile_groups = [[self.min_nbox_coco, nbox_percentile[0]]] + [[nbox_percentile[i], \
+        nbox_percentile = [np.percentile(n_box_per_img_coco, p) for p in percentiles]
+        self.coco_percentile_grp = [[self.min_nbox_coco, nbox_percentile[0]]] + [[nbox_percentile[i], \
                                     nbox_percentile[i+1]] for i in range(0,len(nbox_percentile)-1)] + [[nbox_percentile[-1], self.max_nbox_coco+1]]
-        logger.debug(f"percentile {self.percentile}, coco per grp {self.coco_percentile_groups}")
+        logger.debug(f"percentile {self.percentile}, coco per grp {self.coco_percentile_grp}")
+
+        n_img_per_grp = int(len(dict_img_coco.keys())*self.percentile/100)
+        mean_area_per_img_coco =  np.array(list(map(lambda x: x[1], sorted_by_nbox)))
+        self.coco_mean_area_percentile_grp = []
+        for i in range(len(self.coco_percentile_grp)):
+            self.coco_mean_area_percentile_grp.append(np.mean(mean_area_per_img_coco[i*n_img_per_grp:(i+1)*n_img_per_grp]))
+        logger.debug(f"coco_mean_area_percentile_grp {self.coco_mean_area_percentile_grp}")
+
 
     def download_dataset(self):
         """
