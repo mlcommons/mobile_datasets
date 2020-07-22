@@ -1,3 +1,11 @@
+# Todo:
+""""
+requirements
+readme how to use
+error messages (missing files)
+input_data_path documentation
+import json
+"""
 import cv2
 import sys
 import argparse
@@ -247,6 +255,7 @@ class GoogleDataset(InputDataset):
             logger.debug(f"n_img_per_percentile , {n_img_per_percentile}")
             debt = 0
             n_kept_img_grp = [0 for i in range(len(img_sort_percentiles))]
+
 
             for i in range(len(img_sort_percentiles)): # TODO: code better?
                 n_img_grp = len(img_sort_percentiles[i])
