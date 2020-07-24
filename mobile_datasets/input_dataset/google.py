@@ -57,7 +57,7 @@ class GoogleDataset(InputDataset):
         # Download images
         # download annotations  os.path.join(self.input_data_path, GOOGLE_ANN_URL.split("/")[-1])
         # download descriptions-boxable.csv os.path.join(self.input_data_path, "class-descriptions-boxable.csv")
-
+        # I didn't implemented that yet (i don't think it's a priority since for now we specify input_data_path to use the script)
         raise NotImplementedError
 
 
@@ -111,10 +111,16 @@ class GoogleDataset(InputDataset):
 
     def read_ann_csv(self):
         """
-        delete img with 1 bbox of area < .3
-        COCO:
-        keeps only img with at least 1 class in coco
-        keeps images which respect params: TODO: code another way?
+        This function reads Google annotation csv file in order to keep the information which interest us.
+        Return:
+            ann_dict: (dict)
+                ann_dict[img_id] is a dict with object_id as key.
+                Then ann_dict[img_id][object_id] is a dict which stores bbox, label and area of the object_id object inside the img_id image.
+                An image is stored in ann_dict iff:
+                    - it has at least 1 bbox intersecting with Targetdataset which has an area > 0.2 (hyperparameter TBD)
+                    - it respects params (IsOccluded, IsTruncated etc) (Those are also hyperparameters TBD)
+                    - For imagenet: this bbox is the only bbox annotated (only 1 significant object in image)
+
         """
         ann_csv_path = os.path.join(self.input_data_path, GOOGLE_ANN_URL.split("/")[-1])
         params = dict(zip(['IsOccluded', 'IsTruncated', 'IsGroupOf', 'IsDepiction', 'IsInside'],
