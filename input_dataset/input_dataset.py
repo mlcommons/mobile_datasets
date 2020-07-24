@@ -26,7 +26,6 @@ COCO_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval20
 ADE20K_URL =  "https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip"
 #ADE20K_URL = "https://groups.csail.mit.edu/vision/datasets/ADE20K/ADE20K_2016_07_26.zip"
 
-
 class InputDataset:
     """
     Class which represents the input dataset (e.g. ADE20K) that one wants to subsample from and reformat
@@ -79,16 +78,11 @@ class InputDataset:
         if self.input_data_path is None:
             self.download_dataset()
 
-
-
         # Parameters to mimic number of bbox of coco
         self.percentile = 25
         self.max_nbox_coco = 50
         self.min_nbox_coco = 1
         self.load_classes()
-
-
-
 
     def check_create_tmp_path(self):
         """
