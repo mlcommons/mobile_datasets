@@ -14,7 +14,7 @@ from math import ceil
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .input_dataset import InputDataset
+from .source_dataset import InputDataset
 
 class ADE20KDataset(InputDataset):
     def __init__(self, input_data_path, mobile_app_path, type, yes_all):

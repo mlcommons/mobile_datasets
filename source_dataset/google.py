@@ -3,7 +3,6 @@ import sys
 import argparse
 import os
 import random
-import shutil
 import urllib
 import zipfile
 import requests
@@ -15,14 +14,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import json
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 # CONSTANTS
-IMAGENET_CLASSES_URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
 COCO_CLASSES_URL = "https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.txt"
 COCO_ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
-
 
 ## For development, can use the 1st link, otherwise it'll download the entire dataset (3GB)
 ADE20K_URL =  "https://github.com/ctrnh/mlperf_misc/raw/master/ADE20K_subset.zip"
@@ -31,7 +26,7 @@ GOOGLE_CLASSES_URL = "https://storage.googleapis.com/openimages/v5/class-descrip
 GOOGLE_IMG_URL = "https://datasets.appen.com/appen_datasets/open-images/zip_files_copy/validation.zip"
 GOOGLE_ANN_URL = "https://storage.googleapis.com/openimages/v5/validation-annotations-bbox.csv"
 
-from .input_dataset import InputDataset
+from .source_dataset import InputDataset
 
 class GoogleDataset(InputDataset):
     def __init__(self, input_data_path, mobile_app_path, type, yes_all):
@@ -39,25 +34,15 @@ class GoogleDataset(InputDataset):
                           mobile_app_path=mobile_app_path,
                           type=type,
                           yes_all=yes_all)
+
         self.in_annotations = {}
-        if self.type == "coco":
-            self.intersecting_g_class, self.intersecting_coco, self.intersecting_g_idx, self.mapping_g_coco = self.intersecting_classes(DATASET_CLASSES=self.GOOGLE_CLASSES)
-        elif self.type == "imagenet":
-            self.intersecting_g_class, self.intersecting_imagenet, self.intersecting_g_idx, self.mapping_g_imagenet = self.intersecting_classes(DATASET_CLASSES=self.GOOGLE_CLASSES)
-        logger.debug(f"nb intersecting classes : {len(self.intersecting_g_class)} intersecting g_class {self.intersecting_g_class}")
-    def download_dataset(self):
-        # Download images
-        # download annotations  os.path.join(self.input_data_path, GOOGLE_ANN_URL.split("/")[-1])
-        # download descriptions-boxable.csv os.path.join(self.input_data_path, "class-descriptions-boxable.csv")
 
-        raise NotImplementedError
-
+        self.load_classes()
 
     def load_classes(self):
         """
         Load ADE20K classes in addition to self.type classes.
         """
-        super().load_classes()
         self.GOOGLE_CLASSES = {}
         self.GOOGLE_CLASSES_reverse = {}
         classes_file_path = os.path.join(self.input_data_path, "class-descriptions-boxable.csv")
@@ -67,8 +52,7 @@ class GoogleDataset(InputDataset):
                 self.GOOGLE_CLASSES[row[1].lower()] = row[0]
                 self.GOOGLE_CLASSES_reverse[row[0]] = row[1].lower()
 
-
-    def intersecting_classes(self, DATASET_CLASSES):
+    def intersecting_classes(self, target, DATASET_CLASSES):
         # TODO: modify coco/imagenet + move to input dataset level?
         if self.type == "coco":
             intersecting_data_class= set()
@@ -77,7 +61,7 @@ class GoogleDataset(InputDataset):
             mapping_data_coco = {}
             for data_class in DATASET_CLASSES.keys():
                 for data_single_class in data_class.split(", "):
-                    for coco_class in self.COCO_CLASSES.keys():
+                    for coco_class in target.coco_classes.keys():
                         for coco_single_class in coco_class.split(", "):
                             if data_single_class.lower() == coco_single_class:
                                 intersecting_data_class.add(data_class)
@@ -92,7 +76,7 @@ class GoogleDataset(InputDataset):
             mapping_data_imagenet = {}
             for data_class in DATASET_CLASSES.keys():
                 for data_single_class in data_class.split(", "):
-                    for imagenet_class in self.IMAGENET_CLASSES.keys():
+                    for imagenet_class in target.IMAGENET_CLASSES.keys():
                         for imagenet_single_class in imagenet_class.split(", "):
                             if data_single_class.lower() == imagenet_single_class:
                                 intersecting_data_class.add(data_class)
@@ -101,7 +85,7 @@ class GoogleDataset(InputDataset):
                                 mapping_data_imagenet[DATASET_CLASSES[data_class]] = imagenet_class
             return intersecting_data_class, intersecting_imagenet, intersecting_data_idx, mapping_data_imagenet
 
-    def read_ann_csv(self):
+    def read_ann_csv(self, target):
         """
         delete img with 1 bbox of area < .3
         COCO:
@@ -112,8 +96,8 @@ class GoogleDataset(InputDataset):
         params = dict(zip(['IsOccluded', 'IsTruncated', 'IsGroupOf', 'IsDepiction', 'IsInside'],
                           ["01" for i in range(5)])) # TODO: img with which attributes should we keep?
         params["IsGroupOf"] = "0"
-        logger.info(f"Reading annotations from {ann_csv_path}")
-        logger.info(f"Params {params}")
+        logging.info(f"Reading annotations from {ann_csv_path}")
+        logging.info(f"Params {params}")
         img_to_delete = set()
         ann_dict = {}
         with open(ann_csv_path, 'r') as csvfile:
@@ -133,12 +117,12 @@ class GoogleDataset(InputDataset):
                                 ann_dict[img_id] = {}
                                 obj_id = 0
                                 ann_dict[img_id][obj_id] = {}
-                                ann_dict[img_id][obj_id]["label"] = self.IMAGENET_CLASSES[self.mapping_g_imagenet[google_label]]
+                                ann_dict[img_id][obj_id]["label"] = target.IMAGENET_CLASSES[self.mapping_g_imagenet[google_label]]
                                 ann_dict[img_id][obj_id]["normalized_bbox"] = {"top": float(row[6]),
                                                                                "bot": float(row[7]),
                                                                                "left": float(row[4]),
                                                                                "right": float(row[5])}
-                                ann_dict[img_id][obj_id]["normalized_area"] = self.bbox_area(*ann_dict[img_id][obj_id]['normalized_bbox'].values())
+                                ann_dict[img_id][obj_id]["normalized_area"] = target.bbox_area(*ann_dict[img_id][obj_id]['normalized_bbox'].values())
                     if self.type == "coco":
                         if img_id not in img_to_delete and google_label in self.mapping_g_coco:
                             for attribute in params.keys():
@@ -148,25 +132,23 @@ class GoogleDataset(InputDataset):
                                 ann_dict[img_id] = {}
                             obj_id = len(ann_dict[img_id].keys())
                             ann_dict[img_id][obj_id] = {}
-                            ann_dict[img_id][obj_id]["label"] = self.COCO_CLASSES[self.mapping_g_coco[google_label]]
+                            ann_dict[img_id][obj_id]["label"] = target.coco_classes[self.mapping_g_coco[google_label]]
                             ann_dict[img_id][obj_id]["normalized_bbox"] = {"top": float(row[6]),
                                                                            "bot": float(row[7]),
                                                                            "left": float(row[4]),
                                                                            "right": float(row[5])}
-                            ann_dict[img_id][obj_id]["normalized_area"] = self.bbox_area(*ann_dict[img_id][obj_id]['normalized_bbox'].values())
+                            ann_dict[img_id][obj_id]["normalized_area"] = target.bbox_area(*ann_dict[img_id][obj_id]['normalized_bbox'].values())
         all_img = list(ann_dict.keys())
         for img_id in all_img:
             if img_id in img_to_delete:
                 del ann_dict[img_id]
             elif len(ann_dict[img_id].keys()) == 1 and ann_dict[img_id][0]["normalized_area"] < 0.3:
                 ### Delete image if only 1 bbox which has small area
-                #logger.debug(f"delete {img_id}, area bbox : {ann_dict[img_id][0]['normalized_area']}")
+                #logging.debug(f"delete {img_id}, area bbox : {ann_dict[img_id][0]['normalized_area']}")
                 del ann_dict[img_id]
         return ann_dict
 
-
-
-    def subsample(self, N, policy="random"):
+    def subsample(self, target, N, policy="random"):
         """
         Subsamples from ADE20K: it considers all images which class intersects with imagenet classes.
         Args:
@@ -182,8 +164,15 @@ class GoogleDataset(InputDataset):
             selected_img_path: list of path to images we want to keep in the new dataset
         """
         intersecting_img = []
-        logger.info(f"Subsampling google with a {policy} policy...")
-        ann_dict = self.read_ann_csv()
+        logging.info(f"Subsampling google with a {policy} policy...")
+
+        if self.type == "coco":
+            self.intersecting_g_class, self.intersecting_coco, self.intersecting_g_idx, self.mapping_g_coco = self.intersecting_classes(target, DATASET_CLASSES=self.GOOGLE_CLASSES)
+        elif self.type == "imagenet":
+            self.intersecting_g_class, self.intersecting_imagenet, self.intersecting_g_idx, self.mapping_g_imagenet = self.intersecting_classes(target, DATASET_CLASSES=self.GOOGLE_CLASSES)
+        logging.debug(f"nb intersecting classes : {len(self.intersecting_g_class)} intersecting g_class {self.intersecting_g_class}")
+
+        ann_dict = self.read_ann_csv(target)
         if self.type == "imagenet":
             img_in_class = defaultdict(list)
             for root, dirs, files in os.walk(self.input_data_path):
@@ -196,7 +185,7 @@ class GoogleDataset(InputDataset):
         #### Fetch all images which class intersect with self.type classes ####
         if self.type == "coco": #TODO: recoder propre
             tmp_unselected = set()
-            img_sort_percentiles = [[] for k in range(len(self.coco_percentile_grp))]
+            img_sort_percentiles = [[] for k in range(len(target.coco_percentile_grp))]
             for root, dirs, files in os.walk(self.input_data_path):
                 for img_name in files:
                     if img_name in ann_dict.keys(): #if img_name.endswith(".jpg"):
@@ -205,22 +194,22 @@ class GoogleDataset(InputDataset):
                         self.in_annotations[img_path] = { "objects": ann_dict[img_name],
                                                           "number_bbox": len(ann_dict[img_name].keys()) }
 
-                        for k in range(len(self.coco_percentile_grp)):
-                            lower, upper = self.coco_percentile_grp[k]
+                        for k in range(len(target.coco_percentile_grp)):
+                            lower, upper = target.coco_percentile_grp[k]
                             keep = False
                             if lower <= self.in_annotations[img_path]["number_bbox"] < upper:
                                 areas = list(map(lambda obj_id: ann_dict[img_name][obj_id]["normalized_area"], ann_dict[img_name].keys()))
-                                #logger.debug(f"area {areas}: list of norm area for each obj in img ")
-                                diff_size = abs(self.coco_mean_area_percentile_grp[k] - np.mean(areas))
+                                #logging.debug(f"area {areas}: list of norm area for each obj in img ")
+                                diff_size = abs(target.coco_mean_area_percentile_grp[k] - np.mean(areas))
                                 img_sort_percentiles[k].append([img_path, diff_size])
                                 keep = True
                         if not keep:
                             tmp_unselected.add(img_path)
 
         #### Subsampling from images which intersect ####
-        logger.info(f"Number of intersecting images : {len(intersecting_img)}")
+        logging.info(f"Number of intersecting images : {len(intersecting_img)}")
         if N >= len(intersecting_img):
-            logger.info("Number of intersecting images < N(Number of images we want to keep): keeping all intersecting images.")
+            logging.info("Number of intersecting images < N(Number of images we want to keep): keeping all intersecting images.")
             return intersecting_img
 
         if policy == "random":
@@ -243,14 +232,14 @@ class GoogleDataset(InputDataset):
                 raise NotImplementedError
 
         if self.type == "coco":#policy == "match_n_box_coco":
-            n_img_per_percentile = ceil(N*self.percentile/100)
-            logger.debug(f"n_img_per_percentile , {n_img_per_percentile}")
+            n_img_per_percentile = ceil(N*target.percentile/100)
+            logging.debug(f"n_img_per_percentile , {n_img_per_percentile}")
             debt = 0
             n_kept_img_grp = [0 for i in range(len(img_sort_percentiles))]
 
             for i in range(len(img_sort_percentiles)): # TODO: code better?
                 n_img_grp = len(img_sort_percentiles[i])
-                logger.debug(f"n_img_grp {i}-th grp:{n_img_grp}" )
+                logging.debug(f"n_img_grp {i}-th grp:{n_img_grp}" )
                 if n_img_grp < n_img_per_percentile:
                     n_kept_img_grp[i] += n_img_grp
                     debt += n_img_per_percentile - n_img_grp
@@ -270,18 +259,18 @@ class GoogleDataset(InputDataset):
                         n_kept_img_grp[i] += n_img_give
                         debt -= n_img_give
 
-            logger.debug(f"n_kept_img_grp {n_kept_img_grp}")
+            logging.debug(f"n_kept_img_grp {n_kept_img_grp}")
 
             for i in range(len(img_sort_percentiles)):
                 img_sort_percentiles_grp = sorted(img_sort_percentiles[i],key= lambda pair:pair[1] )
                 # selected_img_path += random.sample(img_sort_percentiles[i], n_kept_img_grp[i])
                 selected_img_path += list(map(lambda p:p[0],img_sort_percentiles_grp[:n_kept_img_grp[i]]))
 
-            logger.debug(f"Number selected_img_path {len(selected_img_path)}")
+            logging.debug(f"Number selected_img_path {len(selected_img_path)}")
 
             if len(selected_img_path) <= N:
                 selected_img_path += random.sample(tmp_unselected, N - len(selected_img_path))
-                logger.debug(f"Added images out bound n_box_min/max : {N - len(selected_img_path)}")
+                logging.debug(f"Added images out bound n_box_min/max : {N - len(selected_img_path)}")
 
 
             # Check the stats
@@ -294,11 +283,9 @@ class GoogleDataset(InputDataset):
             stats_g = np.array(stats_g)
             for i in range(1, 20):
                 p = 5*i
-                logger.debug(f"percentile: {p}, g: {np.percentile(stats_g, p)}")
-            logger.debug(f"mean:  g: {np.mean(stats_g)}")
+                logging.debug(f"percentile: {p}, g: {np.percentile(stats_g, p)}")
+            logging.debug(f"mean:  g: {np.mean(stats_g)}")
         return selected_img_path
-
-
 
     def write_annotation(self, ann_file, img_path, new_img_name):
         """
@@ -328,5 +315,5 @@ class GoogleDataset(InputDataset):
             ann_file.write("}\n")
         elif self.type == "imagenet":
             label = self.in_annotations[img_path]
-            logger.debug(f"Img {img_path}, imagenet label {label}")
+            logging.debug(f"Img {img_path}, imagenet label {label}")
             ann_file.write(str(label) + "\n")
