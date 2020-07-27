@@ -36,6 +36,7 @@ class GoogleDataset(InputDataset):
                           yes_all=yes_all)
 
         self.in_annotations = {}
+        self.class_sep = ", "
 
         self.load_classes()
 
@@ -61,7 +62,7 @@ class GoogleDataset(InputDataset):
             mapping_data_coco = {}
             for data_class in DATASET_CLASSES.keys():
                 for data_single_class in data_class.split(", "):
-                    for coco_class in target.coco_classes.keys():
+                    for coco_class in target.classes.keys():
                         for coco_single_class in coco_class.split(", "):
                             if data_single_class.lower() == coco_single_class:
                                 intersecting_data_class.add(data_class)
@@ -85,12 +86,34 @@ class GoogleDataset(InputDataset):
                                 mapping_data_imagenet[DATASET_CLASSES[data_class]] = imagenet_class
             return intersecting_data_class, intersecting_imagenet, intersecting_data_idx, mapping_data_imagenet
 
+        elif self.type == "ade20k":
+            intersecting_data_class= set()
+            intersecting_target = set()
+            intersecting_data_idx = set()
+            mapping_data_target = {}
+            for data_class in DATASET_CLASSES.keys():
+                for data_single_class in data_class.split(self.class_sep):
+                    for target_class in target.classes.keys():
+                        for target_single_class in target_class.split(target.class_sep):
+                            if data_single_class.lower() == target_single_class:
+                                intersecting_data_class.add(data_class)
+                                intersecting_data_idx.add(DATASET_CLASSES[data_class])
+                                intersecting_target.add(target_class)
+                                mapping_data_target[DATASET_CLASSES[data_class]] = target_class
+            return intersecting_data_class, intersecting_target, intersecting_data_idx, mapping_data_target
+
+
     def read_ann_csv(self, target):
         """
-        delete img with 1 bbox of area < .3
-        COCO:
-        keeps only img with at least 1 class in coco
-        keeps images which respect params: TODO: code another way?
+        This function reads Google annotation csv file in order to keep the information which interest us.
+        Return:
+            ann_dict: (dict)
+                ann_dict[img_id] is a dict with object_id as key.
+                Then ann_dict[img_id][object_id] is a dict which stores bbox, label and area of the object_id object inside the img_id image.
+                An image is stored in ann_dict iff:
+                    - it has at least 1 bbox intersecting with Targetdataset which has an area > 0.2 (hyperparameter TBD)
+                    - it respects params (IsOccluded, IsTruncated etc) (Those are also hyperparameters TBD)
+                    - For imagenet: this bbox is the only bbox annotated (only 1 significant object in image)
         """
         ann_csv_path = os.path.join(self.input_data_path, GOOGLE_ANN_URL.split("/")[-1])
         params = dict(zip(['IsOccluded', 'IsTruncated', 'IsGroupOf', 'IsDepiction', 'IsInside'],
@@ -123,8 +146,9 @@ class GoogleDataset(InputDataset):
                                                                                "left": float(row[4]),
                                                                                "right": float(row[5])}
                                 ann_dict[img_id][obj_id]["normalized_area"] = target.bbox_area(*ann_dict[img_id][obj_id]['normalized_bbox'].values())
-                    if self.type == "coco":
-                        if img_id not in img_to_delete and google_label in self.mapping_g_coco:
+                    elif self.type == "coco" or self.type == "ade20k":
+                        if img_id not in img_to_delete and google_label in self.mapping_g_target:
+                            #logging.debug(self.mapping_g_target[google_label])
                             for attribute in params.keys():
                                 if row[col_titles[attribute]] not in params[attribute]:
                                     img_to_delete.add(img_id)
@@ -132,17 +156,18 @@ class GoogleDataset(InputDataset):
                                 ann_dict[img_id] = {}
                             obj_id = len(ann_dict[img_id].keys())
                             ann_dict[img_id][obj_id] = {}
-                            ann_dict[img_id][obj_id]["label"] = target.coco_classes[self.mapping_g_coco[google_label]]
+                            ann_dict[img_id][obj_id]["label"] = target.classes[self.mapping_g_target[google_label]]
                             ann_dict[img_id][obj_id]["normalized_bbox"] = {"top": float(row[6]),
                                                                            "bot": float(row[7]),
                                                                            "left": float(row[4]),
                                                                            "right": float(row[5])}
                             ann_dict[img_id][obj_id]["normalized_area"] = target.bbox_area(*ann_dict[img_id][obj_id]['normalized_bbox'].values())
+
         all_img = list(ann_dict.keys())
         for img_id in all_img:
             if img_id in img_to_delete:
                 del ann_dict[img_id]
-            elif len(ann_dict[img_id].keys()) == 1 and ann_dict[img_id][0]["normalized_area"] < 0.3:
+            elif len(ann_dict[img_id].keys()) == 1 and ann_dict[img_id][0]["normalized_area"] < 0.2:
                 ### Delete image if only 1 bbox which has small area
                 #logging.debug(f"delete {img_id}, area bbox : {ann_dict[img_id][0]['normalized_area']}")
                 del ann_dict[img_id]
@@ -166,10 +191,8 @@ class GoogleDataset(InputDataset):
         intersecting_img = []
         logging.info(f"Subsampling google with a {policy} policy...")
 
-        if self.type == "coco":
-            self.intersecting_g_class, self.intersecting_coco, self.intersecting_g_idx, self.mapping_g_coco = self.intersecting_classes(target, DATASET_CLASSES=self.GOOGLE_CLASSES)
-        elif self.type == "imagenet":
-            self.intersecting_g_class, self.intersecting_imagenet, self.intersecting_g_idx, self.mapping_g_imagenet = self.intersecting_classes(target, DATASET_CLASSES=self.GOOGLE_CLASSES)
+        self.intersecting_g_class, self.intersecting_target, self.intersecting_g_idx, self.mapping_g_target = self.intersecting_classes(target, DATASET_CLASSES=self.GOOGLE_CLASSES)
+
         logging.debug(f"nb intersecting classes : {len(self.intersecting_g_class)} intersecting g_class {self.intersecting_g_class}")
 
         ann_dict = self.read_ann_csv(target)
@@ -182,8 +205,15 @@ class GoogleDataset(InputDataset):
                         self.in_annotations[img_path] = ann_dict[img_name][0]['label']
                         intersecting_img.append(img_path)
 
-        #### Fetch all images which class intersect with self.type classes ####
-        if self.type == "coco": #TODO: recoder propre
+        elif self.type == "ade20k":
+            img_in_class = defaultdict(list)
+            for root, dirs, files in os.walk(self.input_data_path):
+                for img_name in files:
+                    if img_name in ann_dict.keys(): #if img_name.endswith(".jpg"):
+                        img_path = os.path.join(root, img_name)
+                        intersecting_img.append(img_path)
+
+        elif self.type == "coco": #TODO: recoder propre
             tmp_unselected = set()
             img_sort_percentiles = [[] for k in range(len(target.coco_percentile_grp))]
             for root, dirs, files in os.walk(self.input_data_path):
@@ -317,3 +347,5 @@ class GoogleDataset(InputDataset):
             label = self.in_annotations[img_path]
             logging.debug(f"Img {img_path}, imagenet label {label}")
             ann_file.write(str(label) + "\n")
+        elif self.type == "ade20k":
+            pass

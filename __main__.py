@@ -11,6 +11,7 @@ from source_dataset.google import GoogleDataset
 
 from target_dataset.coco import Coco
 from target_dataset.imagenet import ImageNet
+from target_dataset.ade20k_target import ADE20K_target
 
 import log
 
@@ -116,7 +117,7 @@ def main():
     parser.add_argument("--input_data_path", type=str, help="directory of input dataset (img + annotations). If None, download script", default=None)
     parser.add_argument("--mobile_app_path", type=str, help="path to root directory containing the mobile app repo")
     parser.add_argument("--N", type=int, help="number of samples wanted in the dataset")
-    parser.add_argument("--type", type=str.lower, help="coco or imagenet", choices=["coco", "imagenet"])
+    parser.add_argument("--type", type=str.lower, help="coco, imagenet, or ade20k", choices=["coco", "imagenet", "ade20k"])
     parser.add_argument("--dataset", type=str.lower, default="ade20k", help="Kanter or ADE20K or other to implement", choices=["kanter", "ade20k","google"])
     parser.add_argument("-y", action="store_true", help="automatically answer yes to all questions. If on, the script may remove folders without permission.")
     parser.add_argument("--subsampling_strategy", type=str.lower, help="random or balanced", choices=["random", "balanced"], default="random")
@@ -144,8 +145,10 @@ def main():
 
     if args.type == "coco":
         target_dataset = Coco(mobile_app_path=args.mobile_app_path, force = args.y)
-    if args.type == "imagenet":
+    elif args.type == "imagenet":
         target_dataset = ImageNet(mobile_app_path=args.mobile_app_path, force = args.y)
+    elif args.type == "ade20k":
+        target_dataset = ADE20K_target(mobile_app_path=args.mobile_app_path, force = args.y)
 
     input_data_path = args.input_data_path
     if args.dataset == "kanter":

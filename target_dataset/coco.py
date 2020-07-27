@@ -40,9 +40,9 @@ class Coco(TargetDataset):
             categories = annot_json['categories']
             ids = list(map(lambda d: d['id'], categories))
             labels = list(map(lambda d: d['name'], categories))
-            self.coco_classes_reverse = dict(zip(ids, labels))
-            self.coco_classes = dict(zip(labels, ids))
-            logging.debug(self.coco_classes)
+            self.classes_reverse = dict(zip(ids, labels))
+            self.classes = dict(zip(labels, ids))
+            logging.debug(self.classes)
 
             self.compute_n_box_per_img_coco(annot_json) # useful to match distribution of nb of bbox per img
 
