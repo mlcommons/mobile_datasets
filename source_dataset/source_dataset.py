@@ -67,6 +67,10 @@ class InputDataset:
             self.out_ann_path = self.out_ann_path + ".pbtxt"
 
         self.input_data_path = input_data_path
+
+        self.class_sep = ", "
+
+
         if self.input_data_path is None:
             self.download_dataset()
 
@@ -99,3 +103,19 @@ class InputDataset:
 
     def load_classes(self):
         raise NotImplementedError
+
+    def intersecting_classes(self, target):
+        intersecting_source_class= set()
+        intersecting_target = set()
+        intersecting_source_idx = set()
+        mapping_source_target = {}
+        for source_class in self.classes.keys():
+            for source_single_class in source_class.split(self.class_sep):
+                for target_class in target.classes.keys():
+                    for target_single_class in target_class.split(target.class_sep):
+                        if source_single_class.lower() == target_single_class:
+                            intersecting_source_class.add(source_class)
+                            intersecting_source_idx.add(self.classes[source_class])
+                            intersecting_target.add(target_class)
+                            mapping_source_target[self.classes[source_class]] = target_class
+        return intersecting_source_class, intersecting_target, intersecting_source_idx, mapping_source_target

@@ -26,6 +26,9 @@ class TargetDataset:
 
         logging.info(f"Creating {self.out_img_path} directory")
         os.makedirs(self.out_img_path)
+        self.min_normalized_bbox_area = 0.2
+        self.class_sep = ", "
+        self.classification = False
 
     def load_classes(self):
         raise NotImplementedError
