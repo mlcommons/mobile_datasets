@@ -13,11 +13,10 @@ class Coco(TargetDataset):
     def __init__(self, mobile_app_path, force = False):
         super().__init__(mobile_app_path=mobile_app_path,
                          force=force)
-        self.name = "Coco"
-
+        self.name = "coco"
+        self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", "coco_val.pbtxt")
         self.img_size = (300, 300)
 
-        self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", "coco_val.pbtxt")
 
         # Parameters to mimic number of bbox of coco
         self.percentile = 25
@@ -25,6 +24,9 @@ class Coco(TargetDataset):
         self.min_nbox = 1
 
         self.load_classes()
+
+    def __str__(self):
+        return "coco"
 
     def load_classes(self):
         coco_ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"

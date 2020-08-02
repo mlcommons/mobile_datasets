@@ -16,31 +16,28 @@ class Transformation:
         os.makedirs(self.out_img_path)
 
         self.all_annotations = {}
-        #self.tmp_path?
+
 
     def intersecting_classes(self):
-        intersecting_source_class= set()
-        intersecting_target = set()
-        intersecting_source_idx = set()
-        mapping_source_target = {}
+        self.intersecting_source_class = set()
+        self.intersecting_target = set()
+        self.intersecting_source_idx = set()
+        self.mapping_source_target = {}
         for source_class in self.source.classes.keys():
             for source_single_class in source_class.split(self.source.class_sep):
                 for target_class in self.target.classes.keys():
                     for target_single_class in target_class.split(target.class_sep):
                         if source_single_class.lower() == target_single_class:
-                            intersecting_source_class.add(source_class)
-                            intersecting_source_idx.add(self.source.classes[source_class])
-                            intersecting_target.add(target_class)
-                            mapping_source_target[self.source.classes[source_class]] = target_class
-        logging.debug(f"Number of intersecting classes : {len(intersecting_source_class)} intersecting source classes are: {intersecting_source_class}")
-
-        return intersecting_source_class, intersecting_target, intersecting_source_idx, mapping_source_target
-
+                            self.intersecting_source_class.add(source_class)
+                            self.intersecting_source_idx.add(self.source.classes[source_class])
+                            self.intersecting_target.add(target_class)
+                            self.mapping_source_target[self.source.classes[source_class]] = target_class
+        logging.debug(f"Number of intersecting classes : {len(self.intersecting_source_class)} intersecting source classes are: {self.intersecting_source_class}")
 
 
     def push_to_mobile(self,):
         #### Removes existing source.type/img folder from the phone ####
-        mobile_dataset_path = os.path.join(os.sep,'sdcard','mlperf_datasets', self.source.type)
+        mobile_dataset_path = os.path.join(os.sep,'sdcard','mlperf_datasets', str(self.target))
         phone_dataset = subprocess.run(["adb", "shell", "ls", mobile_dataset_path], stderr=subprocess.DEVNULL)
         if phone_dataset.returncode == 0:
             print(f"{mobile_dataset_path} exists. Its elements will be deleted.")
@@ -109,9 +106,6 @@ class Transformation:
     def create_all_annotations(self):
         """
         Creates self.all_annotations.
-        self.all_annotations is a dict containing useful annotations, and information to subsample.
-        It is created using self.source.annotations_dict, which contains annotations in source_dataset format.
-        self.all_annotations keeps only images which have classes belonging both to source and target dataset.
         self.all_annotations = {img_path: (dict)
                                     {"objects": (list)
                                           [{"normalized_bbox": (dict) {"top": (float), "bot":,...},
@@ -123,12 +117,12 @@ class Transformation:
                                      "number_bbox": (int)
                                     }
                                 }
-
+        self.all_annotations keeps only images which have classes belonging both to source and target dataset,
+        and images where target.min_nbox <= number_bbox <= target.max_nbox
         """
         ann_dict = self.source_ann_dict
-        self.intersecting_source_class, self.intersecting_target, self.intersecting_source_idx, self.mapping_source_target= self.intersecting_classes()
 
-        img_sort_percentiles = [[] for k in range(len(self.target.percentile_grp))]
+        img_sort_percentiles = [[] for k in range(len(self.target.nbox_percentile_grp))]
 
         for root, dirs, files in os.walk(self.source.input_data_path):
             for img_name in files:
@@ -141,15 +135,18 @@ class Transformation:
 
                     number_bbox = len(img_objects)
                     if not (number_bbox == 1 and img_objects[0]["normalized_area"] < self.target.min_normalized_bbox_area): # at least 1 bbox with non negligible area
-                        for idx_grp in range(len(self.target.percentile_grp)):
-                            lower, upper = self.target.percentile_grp[idx_grp]
+                        for idx_grp in range(len(self.target.nbox_percentile_grp)):
+                            lower, upper = self.target.nbox_percentile_grp[idx_grp]
                             keep = False
-                            if lower <= number_bbox < upper: # TODO: attentionaux doublons
+                            if lower <= number_bbox < upper: 
                                 keep = True
                                 img_path = os.path.join(root, img_name)
                                 areas = list(map(lambda obj_id: img_objects[obj_id]["normalized_area"], [obj_id for obj_id in range(len(img_objects))]))
                                 #logging.debug(f"area {areas}: list of norm area for each obj in img ")
-                                diff_area = abs(self.target.coco_mean_area_percentile_grp[k] - np.mean(areas))
+                                if self.target.mean_area_percentile_grp is not None:
+                                    diff_area = abs(self.target.mean_area_percentile_grp[k] - np.mean(areas))
+                                else:
+                                    diff_area = 0
                                 img_sort_percentiles[k].append([img_path, diff_area])
                                 self.all_annotations[img_path]['objects'] = img_objects
                                 self.all_annotations[img_path]['number_bbox'] = number_bbox
@@ -221,7 +218,7 @@ class Transformation:
             selected_img_path = random.sample(selected_img_path, N)
 
         elif policy == "balanced":
-            if self.target.name == "ImageNet":
+            if self.target.name == "imagenet":
                 #img_in_class[imagenet_label].append(img_path)
                 nb_total_img = len(selected_img_path)
                 selected_img_path = []

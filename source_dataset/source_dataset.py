@@ -48,9 +48,8 @@ class InputDataset:
         input_data_path: str
             path to the input dataset
     """
-    def __init__(self, input_data_path,  type, yes_all):
+    def __init__(self, input_data_path, yes_all):
         self.yes_all = yes_all
-        self.type = type
 
         self.input_data_path = input_data_path
 

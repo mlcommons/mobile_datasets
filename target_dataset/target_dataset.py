@@ -26,6 +26,7 @@ class TargetDataset:
 
         logging.info(f"Creating {self.out_img_path} directory")
         os.makedirs(self.out_img_path)
+
         self.min_normalized_bbox_area = 0.2
         self.class_sep = ", "
         self.classification = False
@@ -33,13 +34,18 @@ class TargetDataset:
         self.min_nbox = 1
         self.max_nbox = np.inf
         self.percentile = 100
+        self.nbox_percentile_grp = [[self.min_nbox, self.max_nbox]]
+        self.mean_area_percentile_grp = None
 
-    def compute_percentile_grp(self, list_n_box_per_img):
+    def __str__(self):
+        return ''
+
+    def compute_percentile_grp(self, list_n_box_per_img=None):
         """
         Given a list of number of bboxes, computes self.nbox_percentile_grp
         """
         if self.percentile == 100:
-            self.nbox_percentile_grp = [[self.min_nbox, self.max_nbox]]
+            self.nbox_percentile_grp = [[self.min_nbox, self.max_nbox+1]]
         else:
             percentiles = [self.percentile*i for i in range(1, int(100/self.percentile))]
             nbox_percentile = [np.percentile(list_n_box_per_img, p) for p in percentiles]
@@ -53,16 +59,8 @@ class TargetDataset:
     def format_img_name(self, name):
         raise NotImplementedError
 
-    def intersecting_classes(self):
-        raise NotImplementedError
 
-    def read_annotations(self):
-        raise NotImplementedError
-
-    def subsample(self, N, policy = SubsamplingPolicy.random):
-        raise NotImplementedError
-
-    def write_annotations(self, transformation_annotations, ann_file, img_path, new_img_name):
+    def write_annotation(self, transformation_annotations, ann_file, img_path, new_img_name):
         """
         Write annotation of a given image, into the ann_file.
         Args:
