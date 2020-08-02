@@ -19,7 +19,7 @@ class ImageNet(TargetDataset):
         self.min_normalized_bbox_area = 0.3
         self.max_nbox = 1
 
-        self.compute_percentile_grp(self, list_n_box_per_img=None)
+        self.compute_percentile_grp()
         self.load_classes()
 
     def __str__(self):

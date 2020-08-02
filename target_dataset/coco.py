@@ -94,7 +94,7 @@ class Coco(TargetDataset):
 
     def write_annotation(self, transformation_annotations, ann_file, img_path, new_img_name): # move coco
         ann_file.write("detection_results {\n")
-        for obj in transformation_annotations[img_path]['objects'].keys():
+        for obj in range(len(transformation_annotations[img_path]['objects'])):
             ann_file.write("  objects {\n")
             ann_file.write(f"    class_id: {transformation_annotations[img_path]['objects'][obj]['target_label']}\n")
             ann_file.write("    bounding_box {\n")

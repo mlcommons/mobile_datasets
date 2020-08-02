@@ -24,7 +24,7 @@ def check_remove_dir(path, force = False):
             sys.exit()
         else:
             logging.error("Please enter a valid answer (y or n).")
-            
-def bbox_area(self, bot, top, right, left):
+
+def bbox_area(bot, top, right, left):
     #TODO: move to utils
     return (bot - top) * (right - left)

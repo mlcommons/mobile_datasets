@@ -30,9 +30,8 @@ GOOGLE_ANN_URL = "https://storage.googleapis.com/openimages/v5/validation-annota
 from .source_dataset import InputDataset
 
 class GoogleDataset(InputDataset):
-    def __init__(self, input_data_path, type, yes_all):
+    def __init__(self, input_data_path,  yes_all):
         super().__init__(input_data_path=input_data_path,
-                          type=type,
                           yes_all=yes_all)
 
 

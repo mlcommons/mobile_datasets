@@ -5,6 +5,13 @@ import zipfile
 import json
 import requests
 import numpy as np
+import random
+import cv2
+
+import sys
+import subprocess
+from math import ceil
+import shutil
 
 class Transformation:
     def __init__(self, source, target):
@@ -16,7 +23,7 @@ class Transformation:
         os.makedirs(self.out_img_path)
 
         self.all_annotations = {}
-
+        self.intersecting_classes()
 
     def intersecting_classes(self):
         self.intersecting_source_class = set()
@@ -26,7 +33,7 @@ class Transformation:
         for source_class in self.source.classes.keys():
             for source_single_class in source_class.split(self.source.class_sep):
                 for target_class in self.target.classes.keys():
-                    for target_single_class in target_class.split(target.class_sep):
+                    for target_single_class in target_class.split(self.target.class_sep):
                         if source_single_class.lower() == target_single_class:
                             self.intersecting_source_class.add(source_class)
                             self.intersecting_source_idx.add(self.source.classes[source_class])
@@ -120,7 +127,7 @@ class Transformation:
         self.all_annotations keeps only images which have classes belonging both to source and target dataset,
         and images where target.min_nbox <= number_bbox <= target.max_nbox
         """
-        ann_dict = self.source_ann_dict
+        ann_dict = self.source.ann_dict
 
         img_sort_percentiles = [[] for k in range(len(self.target.nbox_percentile_grp))]
 
@@ -131,23 +138,25 @@ class Transformation:
                     for obj_id in ann_dict[img_name].keys():
                         if ann_dict[img_name][obj_id]['source_label'] in self.mapping_source_target:
                             img_objects.append(ann_dict[img_name][obj_id])
-                            img_objects[-1]["target_label"] = self.target.classes[self.mapping_source_target[ann_dict[img_name][obj_id]['source_label']]]}
+                            img_objects[-1]["target_label"] = self.target.classes[self.mapping_source_target[ann_dict[img_name][obj_id]['source_label']]]
 
                     number_bbox = len(img_objects)
                     if not (number_bbox == 1 and img_objects[0]["normalized_area"] < self.target.min_normalized_bbox_area): # at least 1 bbox with non negligible area
                         for idx_grp in range(len(self.target.nbox_percentile_grp)):
                             lower, upper = self.target.nbox_percentile_grp[idx_grp]
                             keep = False
-                            if lower <= number_bbox < upper: 
+                            if lower <= number_bbox < upper:
                                 keep = True
                                 img_path = os.path.join(root, img_name)
                                 areas = list(map(lambda obj_id: img_objects[obj_id]["normalized_area"], [obj_id for obj_id in range(len(img_objects))]))
                                 #logging.debug(f"area {areas}: list of norm area for each obj in img ")
                                 if self.target.mean_area_percentile_grp is not None:
-                                    diff_area = abs(self.target.mean_area_percentile_grp[k] - np.mean(areas))
+                                    diff_area = abs(self.target.mean_area_percentile_grp[idx_grp] - np.mean(areas))
                                 else:
                                     diff_area = 0
-                                img_sort_percentiles[k].append([img_path, diff_area])
+                                img_sort_percentiles[idx_grp].append([img_path, diff_area])
+                                if img_path not in self.all_annotations.keys():
+                                    self.all_annotations[img_path] = {}
                                 self.all_annotations[img_path]['objects'] = img_objects
                                 self.all_annotations[img_path]['number_bbox'] = number_bbox
 
@@ -204,10 +213,12 @@ class Transformation:
             return selected_img_path
 
         if self.target.percentile != 100:
+            selected_img_path = []
             logging.info(f"Matching number of bbox distribution of {self.target.name} for each {self.target.percentile} percentile.")
             n_img_per_percentile = ceil(N*self.target.percentile/100)
-            n_kept_img_grp = self.compute_n_img_kept_grp(self, n_img_per_percentile=n_img_per_percentile, img_sort_percentiles=img_sort_percentiles)
+            n_kept_img_grp = self.compute_n_img_kept_grp(n_img_per_percentile=n_img_per_percentile, img_sort_percentiles=img_sort_percentiles)
             logging.debug(f"Number of images kept in each percentile group: {n_kept_img_grp}. Ideally, it should match the Number of images per percentile group wanted in new dataset: {n_img_per_percentile}")
+
             for i in range(len(img_sort_percentiles)):
                 img_sort_percentiles_grp = sorted(img_sort_percentiles[i],key=lambda pair:pair[1]) # Sorting per diff_area (closest to target dataset area)
                 selected_img_path += list(map(lambda p:p[0],img_sort_percentiles_grp[:n_kept_img_grp[i]]))

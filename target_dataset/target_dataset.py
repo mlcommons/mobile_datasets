@@ -21,11 +21,10 @@ class TargetDataset:
 
         self.mobile_app_path = mobile_app_path
         self.tmp_path = os.path.join(self.mobile_app_path, "tmp_dataset_script") # temporary folder
-        self.out_img_path = os.path.join(self.tmp_path, "img")
-        utils.check_remove_dir(self.tmp_path, force = force)
 
-        logging.info(f"Creating {self.out_img_path} directory")
-        os.makedirs(self.out_img_path)
+        utils.check_remove_dir(self.tmp_path, force = force)
+        os.mkdir(self.tmp_path)
+
 
         self.min_normalized_bbox_area = 0.2
         self.class_sep = ", "
