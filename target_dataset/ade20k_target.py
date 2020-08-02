@@ -37,3 +37,7 @@ class ADE20K_target(TargetDataset):
 
     def format_img_name(self, name):
         return f"ADE_val_{name:08}.jpg"
+
+    def write_annotation(self):
+        logging.warning("Annotations for ADE20K not implemented yet.")
+        pass

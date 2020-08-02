@@ -48,23 +48,9 @@ class InputDataset:
         input_data_path: str
             path to the input dataset
     """
-    def __init__(self, input_data_path, mobile_app_path, type, yes_all):
+    def __init__(self, input_data_path,  type, yes_all):
         self.yes_all = yes_all
-
         self.type = type
-        self.new_img_size = None
-        if self.type == "coco":
-            self.new_img_size = (300, 300)
-
-        self.mobile_app_path = mobile_app_path
-        self.tmp_path = os.path.join(self.mobile_app_path, "tmp_dataset_script") # temporary folder
-        self.out_img_path = os.path.join(self.tmp_path, "img")
-
-        self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", self.type+"_val")
-        if self.type == "imagenet":
-            self.out_ann_path = self.out_ann_path + ".txt"
-        elif self.type == "coco":
-            self.out_ann_path = self.out_ann_path + ".pbtxt"
 
         self.input_data_path = input_data_path
 
@@ -74,48 +60,18 @@ class InputDataset:
         if self.input_data_path is None:
             self.download_dataset()
 
+        self.ann_dict = {}
+
     def download_dataset(self):
         """
         Downloads dataset from a url to the temp folder self.tmp_path and updates self.input_data_path accordingly.
         """
         raise ValueError("input_data_path must not be None, or download_dtaset should be implemented")
 
-    def write_annotation(self, ann_file, img_path, new_img_name):
-        """
-        Write annotation of a given image, into the ann_file.
-        Args:
-            ann_file: io.TextIOWrapper
-                annotation file where the final annotations are written
-            img_path: str
-                path to the image
-            new_img_name: str
-                name of the new image
-        """
-        raise NotImplementedError
 
-#    def subsample(self):
-#        """
-#        Policy for subsampling.
-#        Returns:
-#            selected_img_path: list of paths to images that we want to put in the output dataset
-#        """
-#        raise NotImplementedError
 
     def load_classes(self):
         raise NotImplementedError
 
-    def intersecting_classes(self, target):
-        intersecting_source_class= set()
-        intersecting_target = set()
-        intersecting_source_idx = set()
-        mapping_source_target = {}
-        for source_class in self.classes.keys():
-            for source_single_class in source_class.split(self.class_sep):
-                for target_class in target.classes.keys():
-                    for target_single_class in target_class.split(target.class_sep):
-                        if source_single_class.lower() == target_single_class:
-                            intersecting_source_class.add(source_class)
-                            intersecting_source_idx.add(self.classes[source_class])
-                            intersecting_target.add(target_class)
-                            mapping_source_target[self.classes[source_class]] = target_class
-        return intersecting_source_class, intersecting_target, intersecting_source_idx, mapping_source_target
+    def create_ann_dict(self):
+        raise NotImplementedError

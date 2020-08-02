@@ -21,6 +21,8 @@ class ImageNet(TargetDataset):
         self.min_normalized_bbox_area = 0.3
         self.classification = True
         self.load_classes()
+        self.max_nbox = 1
+        self.min_nbox = 1
 
     def load_classes(self):
         imagenet_classes_url = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"
@@ -34,3 +36,8 @@ class ImageNet(TargetDataset):
     def bbox_area(self, bot, top, right, left):
         #TODO: move to utils
         return (bot - top) * (right - left)
+
+    def write_annotation(self, transformation_annotations, ann_file, img_path, new_img_name):
+        label = transformation_annotations[img_path]['objects'][0]['target_label']
+        logging.debug(f"Img {img_path}, imagenet label {label}")
+        ann_file.write(str(label) + "\n")
