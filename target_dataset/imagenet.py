@@ -14,7 +14,7 @@ class ImageNet(TargetDataset):
         super().__init__(mobile_app_path=mobile_app_path,
                          force=force)
         self.name = "imagenet"
-        self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", "imagenet.txt")
+        self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", "imagenet_val.txt")
 
         self.min_normalized_bbox_area = 0.3
         self.max_nbox = 1
@@ -32,7 +32,7 @@ class ImageNet(TargetDataset):
         logging.debug(f"nb Imagenet classes: {len(self.classes.keys())}")
 
     def format_img_name(self, name):
-        return f"ILSVRC2012_val_{name+1:08}.JPEG"
+        return f"ILSVRC2012_val_{name:08}.JPEG"
 
 
     def write_annotation(self, transformation_annotations, ann_file, img_path, new_img_name):

@@ -73,4 +73,14 @@ class InputDataset:
         raise NotImplementedError
 
     def create_ann_dict(self):
+        """
+        This function reads the source dataset annotations in order to keep the information which interest us. (It fills self.ann_dict)
+        ann_dict: (dict)
+            ann_dict[img_name] is a dict with object_id as key.
+            Then ann_dict[img_name][object_id] is a dict which stores bbox, label and area of the object_id object inside the img_name image.
+            An image is stored in ann_dict iff:
+                - it has at least 1 bbox intersecting with Targetdataset which has an area > 0.2 (hyperparameter TBD)
+                - it respects params (IsOccluded, IsTruncated etc) (Those are also hyperparameters TBD)
+                - For imagenet: this bbox is the only bbox annotated (only 1 significant object in image)
+        """
         raise NotImplementedError

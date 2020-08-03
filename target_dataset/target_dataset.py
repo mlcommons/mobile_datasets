@@ -42,6 +42,13 @@ class TargetDataset:
     def compute_percentile_grp(self, list_n_box_per_img=None):
         """
         Given a list of number of bboxes, computes self.nbox_percentile_grp
+        Args:
+            list_n_box_per_img: list of int
+                list_n_box_per_img[i] = number of bbox contained in image i
+        Out example:
+        self.percentile = 25
+        self.nbox_percentile_grp = [[1,4], [4,8], [8,10], [10,50]]
+        4 is the 25-percentile of list_n_box_per_img
         """
         if self.percentile == 100:
             self.nbox_percentile_grp = [[self.min_nbox, self.max_nbox+1]]
@@ -63,6 +70,8 @@ class TargetDataset:
         """
         Write annotation of a given image, into the ann_file.
         Args:
+            transformation_annotations: dict
+                dict containing annotations corresponding to img_path
             ann_file: io.TextIOWrapper
                 annotation file where the final annotations are written
             img_path: str

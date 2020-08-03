@@ -26,6 +26,9 @@ class Transformation:
         self.intersecting_classes()
 
     def intersecting_classes(self):
+        """
+        Saves intersecting classes between source and target classes.
+        """
         self.intersecting_source_class = set()
         self.intersecting_target = set()
         self.intersecting_source_idx = set()
@@ -163,6 +166,16 @@ class Transformation:
         return img_sort_percentiles
 
     def compute_n_img_kept_grp(self, n_img_per_percentile, img_sort_percentiles):
+        """
+        Args:
+            img_sort_percentiles: list of tuple of length number of percentile groups
+                img_sort_percentiles[i] = (img_path, diff_area) (diff_area = absolute value of difference between normalized area of bbox in img and normalized area of bbox of target dataset)
+            n_img_per_percentile: int
+                number of images we ideally would like to have in each percentile group
+        Returns:
+            n_kept_img_grp: list of int
+                n_kept_img_grp[i] = number of images we will keep from group i in the final dataset. Ideally, should be close to n_img_per_percentile
+        """
         debt = 0
         n_kept_img_grp = [0 for i in range(len(img_sort_percentiles))]
 
