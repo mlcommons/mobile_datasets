@@ -10,8 +10,8 @@ import numpy as np
 from .target_dataset import TargetDataset
 
 class ImageNet(TargetDataset):
-    def __init__(self, mobile_app_path, force = False):
-        super().__init__(mobile_app_path=mobile_app_path,
+    def __init__(self, mobile_app_path,tmp_path, force = False):
+        super().__init__(mobile_app_path=mobile_app_path,tmp_path=tmp_path,
                          force=force)
         self.name = "imagenet"
         self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", "imagenet_val.txt")

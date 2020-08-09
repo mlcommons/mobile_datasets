@@ -50,24 +50,25 @@ def main():
 
     logging.info("Found device: " + device_name)
 
+    tmp_path = os.path.join(args.mobile_app_path, "tmp_dataset_script") # temporary folder
     if args.type == "coco":
-        target_dataset = Coco(mobile_app_path=args.mobile_app_path, force = args.y)
+        target_dataset = Coco(mobile_app_path=args.mobile_app_path, tmp_path=tmp_path, force = args.y)
     elif args.type == "imagenet":
-        target_dataset = ImageNet(mobile_app_path=args.mobile_app_path, force = args.y)
+        target_dataset = ImageNet(mobile_app_path=args.mobile_app_path, tmp_path=tmp_path, force = args.y)
     elif args.type == "ade20k":
-        target_dataset = ADE20K_target(mobile_app_path=args.mobile_app_path, force = args.y)
+        target_dataset = ADE20K_target(mobile_app_path=args.mobile_app_path, tmp_path=tmp_path, force = args.y)
 
 
     input_data_path = args.input_data_path
     if args.dataset == "ade20k":
-        source_dataset = ADE20KDataset(input_data_path=input_data_path,
-                                yes_all=args.y)
+        source_dataset = ADE20KDataset(input_data_path=input_data_path, tmp_path=tmp_path,
+                                force=args.y)
     elif args.dataset == "google":
-        source_dataset = GoogleDataset(input_data_path=input_data_path,
-                                yes_all=args.y)
+        source_dataset = GoogleDataset(input_data_path=input_data_path, tmp_path=tmp_path,
+                                force=args.y)
 
     transformation = Transformation(source=source_dataset, target=target_dataset)
-    transformation.transform(N=args.N, policy=args.subsampling_strategy)
+    transformation.transform(N=args.N,)#policy=args.subsampling_strategy)
 
 if __name__ == '__main__':
     main()

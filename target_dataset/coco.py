@@ -10,8 +10,8 @@ import numpy as np
 from .target_dataset import TargetDataset
 
 class Coco(TargetDataset):
-    def __init__(self, mobile_app_path, force = False):
-        super().__init__(mobile_app_path=mobile_app_path,
+    def __init__(self, mobile_app_path,tmp_path, force = False):
+        super().__init__(mobile_app_path=mobile_app_path,tmp_path=tmp_path,
                          force=force)
         self.name = "coco"
         self.out_ann_path = os.path.join(self.mobile_app_path, "java", "org", "mlperf", "inference", "assets", "coco_val.pbtxt")
@@ -31,11 +31,18 @@ class Coco(TargetDataset):
     def load_classes(self):
         coco_ann_url = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 
-        logging.info(f"Downloading coco annotation classes to {self.tmp_path}...")
-        zip_path, hdrs = urllib.request.urlretrieve(coco_ann_url, os.path.join(self.tmp_path, "annotations_trainval2017.zip"))
-        logging.info(f"Extracting {zip_path} to temporary folder {self.tmp_path}...")
-        with zipfile.ZipFile(f"{zip_path}", 'r') as z:
-            z.extractall(f"{self.tmp_path}")
+        utils.download_required_files(url=coco_ann_url,
+                                   folder_path=self.tmp_path,
+                                   file_name="annotations_trainval2017.zip",
+                                   unzip_folder=None,
+                                   force=True)
+
+
+        # logging.info(f"Downloading coco annotation classes to {self.tmp_path}...")
+        # zip_path, hdrs = urllib.request.urlretrieve(coco_ann_url, os.path.join(self.tmp_path, "annotations_trainval2017.zip"))
+        # logging.info(f"Extracting {zip_path} to temporary folder {self.tmp_path}...")
+        # with zipfile.ZipFile(f"{zip_path}", 'r') as z:
+        #     z.extractall(f"{self.tmp_path}")
         annot_json = json.load(open( os.path.join(self.tmp_path, "annotations", "instances_val2017.json"), 'r'))
         categories = annot_json['categories']
         ids = list(map(lambda d: d['id'], categories))
@@ -53,6 +60,9 @@ class Coco(TargetDataset):
         Computes statistics about coco bounding boxes that we want to mimic.
         -> computes number of bbox percentiles
         -> computes average of normalized bbox area for each group
+        Args:
+            coco_ann_dict: dict
+                dict of annotations for coco dataset
         """
 
         # Create dict area_img_coco: area_img_coco[img_id] = area of image = width of img * height of img

@@ -9,11 +9,27 @@ import random
 import cv2
 
 import sys
+from enum import Enum
 import subprocess
 from math import ceil
 import shutil
 
+import utils
+
+class SubsamplingPolicy(Enum):
+    random = 1
+    balanced = 2
+
+
 class Transformation:
+    """
+    Class which represents the transformation between the source dataset and the target dataset.
+    Attributes:
+        out_img_path: str
+            path to the temporary folder where the script will dump the new dataset images before pushing to phone
+        all_annotations: dict
+            to be created with self.create_all_annotations
+    """
     def __init__(self, source, target):
         self.source = source
         self.target = target
@@ -27,7 +43,7 @@ class Transformation:
 
     def intersecting_classes(self):
         """
-        Saves intersecting classes between source and target classes.
+        Finds intersecting classes between source and target classes.
         """
         self.intersecting_source_class = set()
         self.intersecting_target = set()
@@ -51,23 +67,8 @@ class Transformation:
         phone_dataset = subprocess.run(["adb", "shell", "ls", mobile_dataset_path], stderr=subprocess.DEVNULL)
         if phone_dataset.returncode == 0:
             print(f"{mobile_dataset_path} exists. Its elements will be deleted.")
-            delete = "n"
-            while delete != "y":
-                if not self.target.force:
-                    delete = input("Do you want to continue? [y/n] \n")
-                if self.target.force or delete == "y":
-                    try:
-                        subprocess.run(["adb", "shell", "rm", "-r", mobile_dataset_path], check=True,
-                                             stderr=subprocess.PIPE, universal_newlines=True)
-                        logging.info(f"{mobile_dataset_path} folder has been removed from the phone.")
-                    except subprocess.CalledProcessError as e:
-                        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.stderr))
-                    break
-                elif delete == "n":
-                    logging.error("Cannot pursue without removing those elements.")
-                    sys.exit()
-                else:
-                    logging.error("Please enter a valid answer (y or n).")
+
+            utils.check_remove_dir(path=mobile_dataset_path, force=self.target.force, mobile_shell=True)
 
         #### Push to mobile ####
         logging.info(f"Creating {os.path.join(mobile_dataset_path,'img')} directory on the phone.")
@@ -83,39 +84,13 @@ class Transformation:
         except subprocess.CalledProcessError as e:
             raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
-    def remove_tmp_folder(self):
-        #### Remove temporary folder ####
-        if not self.target.force:
-            remove_tmp_folder = input(f"Do you want to remove the temporary folder located at {self.target.tmp_path} which has been created by the script? [y/n] \n")
-        if self.target.force or remove_tmp_folder == 'y':
-            subprocess.run(["rm", "-r", self.target.tmp_path], check=True)
-            logging.info(f"{self.target.tmp_path} folder has been removed.")
-
-
-    def process_single_img(self, img_path, new_img_path, img_size):
-        """
-        Processes a single image.
-        If img_size is specified, rescales the image.
-        Otherwise, just copies to the new path.
-        Args:
-            img_path: str
-                path to the image to process
-            new_img_path: str
-                output path to the new image
-        """
-        if img_size is None:
-            logging.debug(f"Copying {img_path} to \n {new_img_path}")
-            shutil.copyfile(img_path,
-                            new_img_path)
-        else:
-            #logging.debug(f"Rescaling {img_path} to shape {self.new_img_size} and save to \n {new_img_path}")
-            img = cv2.imread(img_path)
-            resized_img = cv2.resize(img, img_size, interpolation=cv2.INTER_LINEAR)
-            cv2.imwrite(new_img_path, resized_img)
 
     def create_all_annotations(self):
         """
-        Creates self.all_annotations.
+        Creates self.all_annotations from the information of source.ann_dict.
+        self.all_annotations keeps only images which have classes belonging both to source and target dataset, and images where target.min_nbox <= number_bbox <= target.max_nbox
+
+        Structure of the dict:
         self.all_annotations = {img_path: (dict)
                                     {"objects": (list)
                                           [{"normalized_bbox": (dict) {"top": (float), "bot":,...},
@@ -127,8 +102,7 @@ class Transformation:
                                      "number_bbox": (int)
                                     }
                                 }
-        self.all_annotations keeps only images which have classes belonging both to source and target dataset,
-        and images where target.min_nbox <= number_bbox <= target.max_nbox
+
         """
         ann_dict = self.source.ann_dict
 
@@ -167,6 +141,7 @@ class Transformation:
 
     def compute_n_img_kept_grp(self, n_img_per_percentile, img_sort_percentiles):
         """
+        This function is useful when self.target.percentile != 100. It is used when we try to match the distribution of number of bounding boxes of the target dataset.
         Args:
             img_sort_percentiles: list of tuple of length number of percentile groups
                 img_sort_percentiles[i] = (img_path, diff_area) (diff_area = absolute value of difference between normalized area of bbox in img and normalized area of bbox of target dataset)
@@ -201,22 +176,17 @@ class Transformation:
         return n_kept_img_grp
 
 
-    def subsample(self, N, policy="random"):
+    def subsample(self, N):
         """
-        Subsamples from ADE20K: it considers all images which class intersects with imagenet classes.
+        Subsamples from the source dataset.
         Args:
             N: int
                 number of wanted samples.
-            policy: ["random", "balanced"]
-                type of policy can be:
-                "random": randomly subsamples N images from images which class intersects with self.type classes.
-                "balanced": (imagenet only) subsamples N images from images which class intersects with imagenet classes,
-                            while keeping the frequencies of each class.
 
         Returns:
             selected_img_path: list of path to images we want to keep in the new dataset
         """
-        logging.info(f"Subsampling with a {policy} policy...")
+        logging.info(f"Subsampling the new dataset...")
         img_sort_percentiles = self.create_all_annotations()
         selected_img_path = list(self.all_annotations.keys())
         logging.info(f"Number of images which have intersecting classes between source and target classes : {len(selected_img_path)}")
@@ -238,30 +208,12 @@ class Transformation:
             logging.debug(f"Number of selected images after matching number of bbox of target dataset: {len(selected_img_path)}")
 
 
-        if policy == "random":
-            selected_img_path = random.sample(selected_img_path, N)
-
-        elif policy == "balanced":
-            if self.target.name == "imagenet":
-                #img_in_class[imagenet_label].append(img_path)
-                nb_total_img = len(selected_img_path)
-                selected_img_path = []
-                print(f"Number of total images {nb_total_img}")
-                for cur_class in img_in_class.keys():
-                    nb_img_in_class = len(img_in_class[cur_class])
-                    new_nb_img_in_class = min(nb_img_in_class, ceil((nb_img_in_class*N) / nb_total_img))
-                    selected_img_path += random.sample(img_in_class[cur_class], new_nb_img_in_class)
-                    print(f"Class {cur_class}, nb img in class {nb_img_in_class}, new nb img {new_nb_img_in_class}")
-                    print(f"Frequency = {nb_img_in_class/nb_total_img}")
-
-                selected_img_path = random.sample(selected_img_path, N)
-            else:
-                raise NotImplementedError
-
-        return selected_img_path
+        return random.sample(selected_img_path, N)
 
     def compute_stats_new_dataset(self, selected_img_path):
-        # Computes stats
+        """
+        Computes statistics of number of bbox per image in the new dataset.
+        """
         stats_new_dataset = np.zeros((len(selected_img_path,)))
         for i, img_path in enumerate(selected_img_path):
             stats_new_dataset[i] = self.all_annotations[img_path]["number_bbox"]
@@ -272,37 +224,22 @@ class Transformation:
         logging.info(f"- Mean of number of bboxes per image in new dataset: {np.mean(stats_new_dataset)}")
 
 
-    def transform(self, N, policy):
+    def transform(self, N):
         """
-        DOC OF FORMER PROCESS_DATASET(removed):
-        Processes the input dataset to mimic the format of self.type.
-        Tasks performed:
-        - Process each single image by calling self.process_single_img.
-        For imagenet, the new images should follow the ILSVRC2012 validation set format: images should be in JPEG,
-        and named ILSVRC2012_val_{idx:08}.JPEG where idx starts at 1.
-        - Pushes images to the mobile phone sdcard/mlperf_datasets/{self.type}/img folder.
-        (Existing images of this folder are deleted.)
-        - Replaces ./mobile_app/java/org/mlperf/inference/assets/{self.type annotation file}.txt with corresponding new annotations.
-        For imagenet, the i-th line of the annotation .txt file contains the imagenet label for image ILSVRC2012_val_{i:08}.JPEG.
-        - Remove temporary folder (target.tmp_path)
-
-
+        Transforms the source dataset into the target.
         Args:
-            source: SourceDataset
-            target: TargetDataset
-            selected_img_path: list[str]
-                list of paths to images that we want to put in the new dataset
+            N: number of wanted images in new dataset
         """
         self.source.create_ann_dict()
-        selected_img_path = self.subsample(N=N, policy=policy)
+        selected_img_path = self.subsample(N=N)
         self.compute_stats_new_dataset(selected_img_path)
 
         #### Process each image + write annotations in mobile_app txt file ####
         with open(self.target.out_ann_path,'w') as ann_file:
             for i, img_path in enumerate(selected_img_path):
                 new_img_name = self.target.format_img_name(i + 1)
-                self.process_single_img(img_path=img_path, new_img_path=os.path.join(self.out_img_path, new_img_name), img_size = self.target.img_size)
+                utils.process_single_img(img_path=img_path, new_img_path=os.path.join(self.out_img_path, new_img_name), img_size = self.target.img_size)
                 self.target.write_annotation(transformation_annotations=self.all_annotations, ann_file=ann_file, img_path=img_path, new_img_name=new_img_name)
 
         self.push_to_mobile()
-        self.remove_tmp_folder()
+        utils.check_remove_dir(path=self.target.tmp_path, force=self.target.force, remove_required=False)

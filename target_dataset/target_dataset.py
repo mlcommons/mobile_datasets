@@ -4,23 +4,33 @@ from enum import Enum
 import numpy as np
 import utils
 
-class SubsamplingPolicy(Enum):
-    random = 1
-    balanced = 2
-
 class TargetDataset:
-    def __init__(self, mobile_app_path, force = False):
+    """
+    Class which represents the target dataset (e.g. coco) that one wants to mimic.
+    Attributes:
+        force: bool
+            if True, answers yes to all questions asked by the script (such as permission to remove folders)
+        mobile_app_path: str
+            path to the folder containing the mobile_app repo
+        tmp_path: str
+            path to a temporary folder which will be created and removed at the end of the process
+        out_ann_path: str
+            path to the folder which contains the annotations files (in mobile_app repo)
+        min_nbox/max_nbox: int
+            respectively minimum and maximum number of bounding boxes wanted per image in the new
+        percentile: int
+            percentiles of number of bounding boxes per image that we want to match to target (used in self.compute_percentile_grp)
+
+    """
+    def __init__(self, mobile_app_path, tmp_path, force = False):
+
         self.force = force
         self.name = ""
         self.img_size = None
         self.out_ann_path = ""
-        self.classes_url = ""
-        self.ann_url = ""
-        self.dataset_classes = []
-
 
         self.mobile_app_path = mobile_app_path
-        self.tmp_path = os.path.join(self.mobile_app_path, "tmp_dataset_script") # temporary folder
+        self.tmp_path = tmp_path
 
         utils.check_remove_dir(self.tmp_path, force = force)
         os.mkdir(self.tmp_path)
@@ -45,7 +55,7 @@ class TargetDataset:
         Args:
             list_n_box_per_img: list of int
                 list_n_box_per_img[i] = number of bbox contained in image i
-        Out example:
+        Example:
         self.percentile = 25
         self.nbox_percentile_grp = [[1,4], [4,8], [8,10], [10,50]]
         4 is the 25-percentile of list_n_box_per_img

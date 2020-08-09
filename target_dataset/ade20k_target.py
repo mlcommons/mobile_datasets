@@ -9,8 +9,8 @@ import numpy as np
 from .target_dataset import TargetDataset
 
 class ADE20K_target(TargetDataset):
-    def __init__(self, mobile_app_path, force = False):
-        super().__init__(mobile_app_path=mobile_app_path,
+    def __init__(self, mobile_app_path,tmp_path, force = False):
+        super().__init__(mobile_app_path=mobile_app_path,tmp_path=tmp_path,
                          force=force)
         self.name = "ADE20K"
         self.out_ann_path = os.path.join(self.tmp_path, "ade.txt") #TODO: png folder, TBD when we get final implementation of mobile_app
