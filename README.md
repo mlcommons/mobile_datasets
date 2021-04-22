@@ -1,4 +1,4 @@
-Script which converts a given dataset to imagenet/coco-like dataset for speed tests.
+Script which converts a given dataset to imagenet/coco-like dataset for speed tests for MLPerf™ Mobile.
 
 # Requirements
 - python3
